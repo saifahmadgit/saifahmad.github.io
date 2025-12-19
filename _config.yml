@@ -2,7 +2,8 @@ title: Saif Ahmad
 description: Robotics | Perception | Manipulation
 url: https://saifahmad.github.io
 
-theme: null   # IMPORTANT: disables default themes
+theme: jekyll-theme-minimal
+
 
 collections:
   projects:
