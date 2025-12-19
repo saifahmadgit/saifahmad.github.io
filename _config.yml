@@ -1,3 +1,20 @@
 title: Saif Ahmad
-description: Portfolio website
-theme: jekyll-theme-minimal
+description: Robotics | Perception | Manipulation
+url: https://saifahmad.github.io
+
+theme: null   # IMPORTANT: disables default themes
+
+collections:
+  projects:
+    output: true
+    permalink: /projects/:name/
+
+nav:
+  - name: Home
+    link: /
+  - name: GitHub
+    link: https://github.com/saifahmad
+  - name: LinkedIn
+    link: https://linkedin.com/in/saifahmad
+  - name: Resume
+    link: /resume.pdf
