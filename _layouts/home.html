@@ -5,34 +5,38 @@ layout: default
 <div class="main-grid">
 
   <!-- LEFT SIDEBAR -->
-  <div class="sidebar">
+  <aside class="sidebar">
     <h1>Saif Ahmad</h1>
-    <p>MS in Robotics</p>
-    <p>Robotics · Perception · Manipulation</p>
-    <p>📍 United States</p>
 
-    <div class="links">
-      <a href="https://github.com/saifahmadgit" target="_blank">GitHub</a><br>
-      <a href="https://www.linkedin.com/in/saif_ahmad" target="_blank">LinkedIn</a><br>
-      <a href="mailto:your@email.com">Email</a><br>
+    <p class="subtitle">MS in Robotics</p>
+    <p class="interests">Robotics · Perception · Manipulation</p>
+
+    <p class="location">📍 United States</p>
+
+    <nav class="links">
+      <a href="https://github.com/saifahmadgit" target="_blank">GitHub</a>
+      <a href="https://www.linkedin.com/in/saif_ahmad" target="_blank">LinkedIn</a>
+      <a href="mailto:your@email.com">Email</a>
       <a href="{{ '/resume.pdf' | relative_url }}" target="_blank">Resume</a>
-    </div>
-  </div>
+    </nav>
+  </aside>
 
   <!-- MAIN CONTENT -->
-  <div>
-    <h2>Featured Robotics Projects</h2>
+  <main class="content">
+    <section>
+      <h2>Featured Robotics Projects</h2>
 
-    {% for project in site.projects %}
-      <div style="margin-bottom:24px;">
-        <h3>
-          <a href="{{ project.url | relative_url }}">
-            {{ project.title }}
-          </a>
-        </h3>
-        <p>{{ project.tags }}</p>
-      </div>
-    {% endfor %}
-  </div>
+      {% for project in site.projects %}
+        <div class="project-item">
+          <h3>
+            <a href="{{ project.url | relative_url }}">
+              {{ project.title }}
+            </a>
+          </h3>
+          <p class="project-tags">{{ project.tags }}</p>
+        </div>
+      {% endfor %}
+    </section>
+  </main>
 
 </div>
