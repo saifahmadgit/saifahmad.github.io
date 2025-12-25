@@ -2,9 +2,55 @@
 layout: default
 ---
 
-<article class="project">
+<article class="project-page">
   <h1>{{ page.title }}</h1>
-  <img src="{{ page.image }}" />
-  <p>{{ page.description }}</p>
-  {{ content }}
+
+  {% if page.youtube %}
+    <div class="video-container">
+      <iframe
+        width="100%" height="420"
+        src="https://www.youtube-nocookie.com/embed/{{ page.youtube }}?rel=0"
+        title="{{ page.title }}"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+      </iframe>
+    </div>
+  {% endif %}
+
+  {% if page.youtube_2 %}
+    <div class="video-container">
+      <iframe
+        width="100%" height="420"
+        src="https://www.youtube-nocookie.com/embed/{{ page.youtube_2 }}?rel=0"
+        title="{{ page.title }} Simulation"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+      </iframe>
+    </div>
+  {% endif %}
+
+  <div class="content">
+    {{ content }}
+  </div>
 </article>
+
+<style>
+.video-container {
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.video-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+}
+</style>

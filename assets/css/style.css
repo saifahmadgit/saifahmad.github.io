@@ -102,3 +102,36 @@ a:hover {
   margin-left: 20px;
   font-weight: 500;
 }
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin: 3rem 0;
+  justify-items: center;
+}
+
+.project-card {
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.project-card img {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.project-card:hover img {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+}
+
+.project-card h3 {
+  margin-top: 1rem;
+  font-weight: 600;
+  color: #222;
+}
+
