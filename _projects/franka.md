@@ -1,3 +1,11 @@
+---
+layout: project
+title: Franka Vision-Guided Pick and Place
+tags: Grasping, Vision, Learning
+gif: /assets/gifs/grasp_demo.gif
+---
+
+
 ## Overview
 This project demonstrates a **vision-guided robotic pick-and-place system** built on the **Franka Emika Panda manipulator**, integrating perception, planning, and control modules in **ROS 2** and **MoveIt 2**. The goal was to enable the robot to autonomously detect, identify, and manipulate objects in its workspace with minimal human supervision.
 
