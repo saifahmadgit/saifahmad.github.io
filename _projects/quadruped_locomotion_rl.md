@@ -8,7 +8,7 @@ gif: /assets/gifs/sim_to_real.gif
 
 <iframe class="video"
         style="aspect-ratio: 16 / 9.95;"
-        src="https://www.youtube.com/embed/nrwN8KrsD2c"
+        src="https://www.youtube.com/watch?v=m1GyvmJ9dBw"
         title="Sim-to-Real Reinforcement Learning Walking Including Stairs"
         frameborder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
