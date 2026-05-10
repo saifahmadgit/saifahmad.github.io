@@ -56,7 +56,20 @@ title: Portfolio
   </div>
 </div>
 
-<!-- 5) Grasp -->
+<!-- 5) Diffusion Path Planning -->
+<div class="project-row">
+  <div class="project-media">
+    <img src="{{ '/assets/images/Diffusion.png' | relative_url }}" alt="Diffusion Model for Path Planning" loading="lazy">
+  </div>
+  <div class="project-info">
+    <p><a class="project-title-link" href="{{ site.baseurl }}/projects/diffusion-path-planning/"><strong>Diffusion Model for Path Planning from Scratch</strong></a></p>
+    <p class="project-tags"><span class="tag">Diffusion Model</span><span class="tag">PyTorch</span><span class="tag">Path Planning</span><span class="tag">Deep Learning</span></p>
+    <p>An image-conditioned diffusion model built from scratch that generates collision-free robot paths on 2D grid maps. A U-Net with attention at the bottleneck learns to denoise valid trajectories around obstacles, with a Gradio GUI for interactive inference.</p>
+    <p><a href="https://github.com/saifahmadgit/Diffusion_model_for_path_planning" target="_blank" rel="noopener">GitHub ↗</a></p>
+  </div>
+</div>
+
+<!-- 6) Grasp -->
 <div class="project-row">
   <div class="project-media">
     <img src="{{ '/assets/gifs/grasp_demo.gif' | relative_url }}" alt="Prompt-to-Pose Grasp Estimation" loading="lazy">
