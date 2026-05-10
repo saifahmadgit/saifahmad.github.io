@@ -29,7 +29,20 @@ title: Portfolio
   </div>
 </div>
 
-<!-- 3) Franka -->
+<!-- 3) LeHome Challenge -->
+<div class="project-row">
+  <div class="project-media">
+    <img src="{{ '/assets/gifs/lehome.gif' | relative_url }}" alt="LeHome Challenge Garment Manipulation" loading="lazy">
+  </div>
+  <div class="project-info">
+    <p><a class="project-title-link" href="{{ site.baseurl }}/projects/lehome-challenge/"><strong>LeHome Challenge – ICRA 2026 Garment Manipulation Competition</strong></a></p>
+    <p class="project-tags"><span class="tag">VLA</span><span class="tag">Diffusion Policy</span><span class="tag">Pi 0.5</span><span class="tag">Isaac Sim</span><span class="tag">LeRobot SO-ARM101</span></p>
+    <p>Deploying fine-tuned Pi 0.5 VLA policies for deformable garment manipulation on the LeRobot SO-ARM101. Built an automated demonstration collection pipeline in Isaac Sim using cuRobo for GPU-accelerated motion planning, enabling large-scale sim data generation without manual teleoperation.</p>
+    <p><a href="https://github.com/cwoodhayes/lehome-laundrynauts" target="_blank" rel="noopener">GitHub ↗</a></p>
+  </div>
+</div>
+
+<!-- 4) Franka -->
 <div class="project-row">
   <div class="project-media">
     <img src="{{ '/assets/gifs/franka_demo.gif' | relative_url }}" alt="Franka Vision-Guided Pick & Place" loading="lazy">
@@ -43,7 +56,7 @@ title: Portfolio
   </div>
 </div>
 
-<!-- 4) Grasp -->
+<!-- 5) Grasp -->
 <div class="project-row">
   <div class="project-media">
     <img src="{{ '/assets/gifs/grasp_demo.gif' | relative_url }}" alt="Prompt-to-Pose Grasp Estimation" loading="lazy">
@@ -56,7 +69,7 @@ title: Portfolio
   </div>
 </div>
 
-<!-- 5) Jack -->
+<!-- 6) Jack -->
 <div class="project-row">
   <div class="project-media">
     <img src="{{ '/assets/gifs/jack_demo.gif' | relative_url }}" alt="Jack-in-the-Box Dynamics" loading="lazy">
@@ -68,7 +81,7 @@ title: Portfolio
   </div>
 </div>
 
-<!-- 6) Pen -->
+<!-- 7) Pen -->
 <div class="project-row">
   <div class="project-media">
     <img src="{{ '/assets/gifs/pen_demo.gif' | relative_url }}" alt="Pen Catcher Robot" loading="lazy">
