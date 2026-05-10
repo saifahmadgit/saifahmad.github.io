@@ -9,11 +9,11 @@ tech_tags: "Diffusion Model, PyTorch, Path Planning, Deep Learning"
 
 ## Overview
 
-An **image-conditioned diffusion model** built from scratch that generates collision-free paths on 2D grid maps for mobile robot navigation. Given a grid map with a marked start (green) and goal (red), the model denoises a path (blue) that navigates around obstacles — learning the distribution of valid trajectories rather than following a fixed planning algorithm.
+An **image-conditioned diffusion model** built from scratch that generates collision-free paths on 2D grid maps for mobile robot navigation. Given a grid map with a marked start (green) and goal (red), the model denoises a path (blue) that navigates around obstacles, learning the distribution of valid trajectories rather than following a fixed planning algorithm.
 
 ## Architecture
 
-The model is a **U-Net denoising network** conditioned on the occupancy grid image. Key design choice: **attention mechanisms at the bottleneck and at the encoder/decoder layers surrounding it**. Standard U-Nets struggle when the start and goal are far apart — the bottleneck compresses spatial information too aggressively, losing the long-range context needed to connect distant points. Adding attention at these layers lets the model reason over the full map extent during denoising, substantially improving path connectivity.
+The model is a **U-Net denoising network** conditioned on the occupancy grid image. Key design choice: **attention mechanisms at the bottleneck and at the encoder/decoder layers surrounding it**. Standard U-Nets struggle when the start and goal are far apart, the bottleneck compresses spatial information too aggressively, losing the long-range context needed to connect distant points. Adding attention at these layers lets the model reason over the full map extent during denoising, substantially improving path connectivity.
 
 The forward diffusion process gradually adds noise to ground-truth paths; the reverse process learns to denoise from pure noise back to a valid path conditioned on the map image.
 
@@ -24,7 +24,7 @@ The forward diffusion process gradually adds noise to ground-truth paths; the re
 - Checkpoints saved every 25 epochs to track denoising quality progression
 - Batch size tuned for limited GPU memory
 
-The model learns to generate paths that avoid obstacles and connect start to goal, though the specific route may differ from ground-truth since many valid paths exist for a given map — the model samples from the distribution of plausible trajectories.
+The model learns to generate paths that avoid obstacles and connect start to goal, though the specific route may differ from ground-truth since many valid paths exist for a given map, the model samples from the distribution of plausible trajectories.
 
 ## Inference
 

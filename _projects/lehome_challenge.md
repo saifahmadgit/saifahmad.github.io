@@ -15,21 +15,21 @@ gif: /assets/gifs/lehome.gif
 
 ## Overview
 
-The **LeHome Challenge** is ICRA 2026's standardized benchmarking competition for robotic garment manipulation — a domain that sits at the frontier of deformable object handling, contact-rich manipulation, and visuomotor policy generalization. The task demands that a **LeRobot SO-ARM101** reliably fold, sort, and place garments despite their infinite configuration space and unpredictable dynamics.
+The **LeHome Challenge** is ICRA 2026's standardized benchmarking competition for robotic garment manipulation, a domain that sits at the frontier of deformable object handling, contact-rich manipulation, and visuomotor policy generalization. The task demands that a **LeRobot SO-ARM101** reliably fold, sort, and place garments despite their infinite configuration space and unpredictable dynamics.
 
-Our team (**Laundrynauts**) is developing a pipeline that deploys **Vision-Language-Action (VLA)** policies — specifically **Pi 0.5** fine-tuned with **Diffusion Policy** — for robust end-to-end garment manipulation. The competition has two phases: a simulation phase (Feb–Apr 2026) evaluated in Isaac Sim, followed by an on-site real-world phase at ICRA 2026 (June, Vienna). The top 8 teams from simulation advance to hardware.
+Our team (**Laundrynauts**) is developing a pipeline that deploys **Vision-Language-Action (VLA)** policies, specifically **Pi 0.5** fine-tuned with **Diffusion Policy**, for robust end-to-end garment manipulation. The competition has two phases: a simulation phase (Feb–Apr 2026) evaluated in Isaac Sim, followed by an on-site real-world phase at ICRA 2026 (June, Vienna). The top 8 teams from simulation advance to hardware.
 
 ## Technical Approach
 
 **VLA Policy Deployment**
 
-Pi 0.5 is a flow-matching generalist robot policy pre-trained on diverse manipulation data. We fine-tune it on garment-specific demonstrations using **Diffusion Policy** as the action head, which handles the multimodal action distributions that arise from deformable object manipulation — the same garment task can be completed through many physically valid trajectories.
+Pi 0.5 is a flow-matching generalist robot policy pre-trained on diverse manipulation data. We fine-tune it on garment-specific demonstrations using **Diffusion Policy** as the action head, which handles the multimodal action distributions that arise from deformable object manipulation, since the same garment task can be completed through many physically valid trajectories.
 
 Fine-tuning targets the SO-ARM101 action space directly, mapping visual observations (wrist + overhead RGB) to joint position commands. The challenge is distributional shift: garments crumple, fold, and occlude themselves in ways that stress visual encoders trained on rigid objects.
 
 **Simulation Data Collection with cuRobo**
 
-A key bottleneck in manipulation learning is demonstration data. We built an **automated data collection pipeline in Isaac Sim** using **cuRobo** for GPU-accelerated motion planning. The pipeline procedurally generates garment configurations, plans collision-free trajectories to target grasp and placement poses, and records demonstrations at scale — eliminating the need for manual teleoperation for the bulk of the training set.
+A key bottleneck in manipulation learning is demonstration data. We built an **automated data collection pipeline in Isaac Sim** using **cuRobo** for GPU-accelerated motion planning. The pipeline procedurally generates garment configurations, plans collision-free trajectories to target grasp and placement poses, and records demonstrations at scale, eliminating the need for manual teleoperation for the bulk of the training set.
 
 cuRobo's batched IK and trajectory optimization run entirely on GPU, making it feasible to generate thousands of diverse demonstrations across garment types and initial conditions. The resulting dataset covers a much wider configuration distribution than human-collected data alone.
 
@@ -39,7 +39,7 @@ The simulation phase uses Isaac Sim's cloth simulation for garment physics. Tran
 
 - **Domain randomization** over cloth physical parameters (stiffness, friction, mass distribution)
 - **Visual augmentation** to reduce texture and lighting dependency in the visual encoder
-- **Wrist camera emphasis** — close-range wrist views are more robust to the global appearance shift between sim and real than overhead views
+- **Wrist camera emphasis**: close-range wrist views are more robust to the global appearance shift between sim and real than overhead views
 
 ## Competition Structure
 

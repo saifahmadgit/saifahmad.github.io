@@ -14,7 +14,7 @@ gif: /assets/gifs/jack_demo.gif
 
 ## Overview
 This project investigates the **nonlinear dynamics of a Jack-in-the-Box mechanism**, focusing on contact, spring, and impact interactions.  
-The system consists of a mass–spring–hinge assembly that undergoes large-amplitude motion when released, exhibiting **hybrid dynamics**—continuous spring oscillation combined with discrete impact events.  
+The system consists of a mass–spring–hinge assembly that undergoes large-amplitude motion when released, exhibiting **hybrid dynamics**: continuous spring oscillation combined with discrete impact events.  
 
 The objective was to build a physics-accurate model and simulate the box-lid motion and internal “pop-up” dynamics to better understand **impact timing, damping effects, and energy transfer** between components.
 

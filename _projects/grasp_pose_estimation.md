@@ -12,7 +12,7 @@ gif: /assets/gifs/grasp_demo.gif
 ---
 
 ## Overview
-This project presents a **prompt-to-pose grasp planning pipeline** that allows a robot to understand a **natural language instruction** (e.g., *“pick up the red mug”*) and output **6-DoF grasp poses** for that object — even in cluttered environments.  
+This project presents a **prompt-to-pose grasp planning pipeline** that allows a robot to understand a **natural language instruction** (e.g., *“pick up the red mug”*) and output **6-DoF grasp poses** for that object, even in cluttered environments.  
 It combines **grounded vision-language models** with **3D grasp estimation networks**, bridging perception and manipulation through learning-based inference.
 
 ---

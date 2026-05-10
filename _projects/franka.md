@@ -20,7 +20,7 @@ An autonomous pick-and-place system on the **Franka Emika Panda** using an **Int
 
 **1. Calibration**: a `camera_calibration` node establishes coordinate transforms between camera, robot base, and an ArUco marker placed 0.3 m from the base. This single calibration step grounds all downstream 3D pose estimates in the robot frame.
 
-**2. Perception**: the `grasp_node` runs YOLOv8 on the live RealSense stream, aggregating detections across multiple frames before committing to an object identity. Aggregation filters per-frame noise and handles the fact that YOLO detections carry no fixed ordering — objects and targets are paired programmatically after all detections stabilize.
+**2. Perception**: the `grasp_node` runs YOLOv8 on the live RealSense stream, aggregating detections across multiple frames before committing to an object identity. Aggregation filters per-frame noise and handles the fact that YOLO detections carry no fixed ordering; objects and targets are paired programmatically after all detections stabilize.
 
 **3. Planning and Execution**: a custom MoveIt 2 interface wraps OMPL trajectory planning with collision checking. The main orchestration script sequences home positioning, workspace scanning, object-target pairing, and iterative pick-and-place. Failed grasps trigger automatic re-scanning and retry rather than halting execution.
 

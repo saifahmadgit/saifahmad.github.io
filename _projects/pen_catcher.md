@@ -13,7 +13,7 @@ gif: /assets/gifs/pen_demo.gif
 
 ## Overview
 This project showcases a **real-time vision-based control system** designed to catch a falling pen using a robotic arm.  
-The goal was to demonstrate **dynamic motion control** and **low-latency visual feedback** for intercepting a rapidly moving target — a challenging benchmark in robotic control due to the system’s tight timing constraints.
+The goal was to demonstrate **dynamic motion control** and **low-latency visual feedback** for intercepting a rapidly moving target, a challenging benchmark in robotic control due to the system’s tight timing constraints.
 
 ---
 
