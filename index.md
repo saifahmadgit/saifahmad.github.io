@@ -72,7 +72,7 @@ title: Portfolio
 <!-- 6) GPT-2 RL -->
 <div class="project-row">
   <div class="project-media">
-    <img src="{{ '/assets/images/transformer.png' | relative_url }}" alt="GPT-2 from Scratch with RL Fine-Tuning" loading="lazy">
+    <img src="{{ '/assets/images/transformer.png' | relative_url }}" alt="GPT-2 from Scratch with RL Fine-Tuning" loading="lazy" style="max-height:220px;object-fit:cover;object-position:top;">
   </div>
   <div class="project-info">
     <p><a class="project-title-link" href="{{ site.baseurl }}/projects/gpt2-rl-finetuning/"><strong>GPT-2 from Scratch with RL Fine-Tuning</strong></a></p>
