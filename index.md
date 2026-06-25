@@ -69,28 +69,16 @@ title: Portfolio
   </div>
 </div>
 
-<!-- 6) Grasp -->
+<!-- 6) GPT-2 RL -->
 <div class="project-row">
   <div class="project-media">
-    <img src="{{ '/assets/gifs/grasp_demo.gif' | relative_url }}" alt="Prompt-to-Pose Grasp Estimation" loading="lazy">
+    <img src="{{ '/assets/images/transformer.png' | relative_url }}" alt="GPT-2 from Scratch with RL Fine-Tuning" loading="lazy">
   </div>
   <div class="project-info">
-    <p><a class="project-title-link" href="{{ site.baseurl }}/projects/grasp-pose-estimation/"><strong>Prompt-to-Pose Grasp Estimation</strong></a></p>
-    <p class="project-tags"><span class="tag">Grounding DINO</span><span class="tag">SAM 2</span><span class="tag">Contact-GraspNet</span><span class="tag">6-DoF Grasping</span></p>
-    <p>A natural language-guided grasp planning pipeline using Grounding DINO for object localization, SAM 2 for segmentation, and Contact-GraspNet to generate 6-DoF grasp poses from text descriptions.</p>
-    <p><a href="https://github.com/saifahmadgit/prompt-guided-robotic-grasping" target="_blank" rel="noopener">GitHub ↗</a></p>
-  </div>
-</div>
-
-<!-- 6) Jack -->
-<div class="project-row">
-  <div class="project-media">
-    <img src="{{ '/assets/gifs/jack_demo.gif' | relative_url }}" alt="Jack-in-the-Box Dynamics" loading="lazy">
-  </div>
-  <div class="project-info">
-    <p><a class="project-title-link" href="{{ site.baseurl }}/projects/jack-in-the-box/"><strong>Jack-in-the-Box Dynamics</strong></a></p>
-    <p class="project-tags"><span class="tag">Hybrid Dynamical Systems</span><span class="tag">SymPy</span><span class="tag">SciPy</span></p>
-    <p>Physics-based simulation and analysis of a Jack-in-the-Box mechanism, modeling the hybrid dynamics of spring oscillation combined with discrete impact events.</p>
+    <p><a class="project-title-link" href="{{ site.baseurl }}/projects/gpt2-rl-finetuning/"><strong>GPT-2 from Scratch with RL Fine-Tuning</strong></a></p>
+    <p class="project-tags"><span class="tag">PyTorch</span><span class="tag">Transformers</span><span class="tag">PPO</span><span class="tag">NLP</span></p>
+    <p>A decoder-only GPT-2 transformer built from scratch and trained on Sherlock Holmes, then fine-tuned with PPO to steer outputs toward dialogue using programmatic verifiable rewards — no learned reward model required.</p>
+    <p><a href="https://github.com/saifahmadgit/GPT2_from_Scratch_with_RL_finetuning" target="_blank" rel="noopener">GitHub ↗</a></p>
   </div>
 </div>
 
@@ -104,5 +92,30 @@ title: Portfolio
     <p class="project-tags"><span class="tag">ROS 2</span><span class="tag">OpenCV</span><span class="tag">Kalman Filter</span></p>
     <p>A real-time vision system that uses OpenCV tracking and Kalman filter prediction to intercept a falling pen with a robotic arm under tight latency constraints.</p>
     <p><a href="https://github.com/saifahmadgit/MS_Robotics_PenChallenge" target="_blank" rel="noopener">GitHub ↗</a></p>
+  </div>
+</div>
+
+<!-- 8) Grasp -->
+<div class="project-row">
+  <div class="project-media">
+    <img src="{{ '/assets/gifs/grasp_demo.gif' | relative_url }}" alt="Prompt-to-Pose Grasp Estimation" loading="lazy">
+  </div>
+  <div class="project-info">
+    <p><a class="project-title-link" href="{{ site.baseurl }}/projects/grasp-pose-estimation/"><strong>Prompt-to-Pose Grasp Estimation</strong></a></p>
+    <p class="project-tags"><span class="tag">Grounding DINO</span><span class="tag">SAM 2</span><span class="tag">Contact-GraspNet</span><span class="tag">6-DoF Grasping</span></p>
+    <p>A natural language-guided grasp planning pipeline using Grounding DINO for object localization, SAM 2 for segmentation, and Contact-GraspNet to generate 6-DoF grasp poses from text descriptions.</p>
+    <p><a href="https://github.com/saifahmadgit/prompt-guided-robotic-grasping" target="_blank" rel="noopener">GitHub ↗</a></p>
+  </div>
+</div>
+
+<!-- 9) Jack -->
+<div class="project-row">
+  <div class="project-media">
+    <img src="{{ '/assets/gifs/jack_demo.gif' | relative_url }}" alt="Jack-in-the-Box Dynamics" loading="lazy">
+  </div>
+  <div class="project-info">
+    <p><a class="project-title-link" href="{{ site.baseurl }}/projects/jack-in-the-box/"><strong>Jack-in-the-Box Dynamics</strong></a></p>
+    <p class="project-tags"><span class="tag">Hybrid Dynamical Systems</span><span class="tag">SymPy</span><span class="tag">SciPy</span></p>
+    <p>Physics-based simulation and analysis of a Jack-in-the-Box mechanism, modeling the hybrid dynamics of spring oscillation combined with discrete impact events.</p>
   </div>
 </div>
