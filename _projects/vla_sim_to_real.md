@@ -63,7 +63,23 @@ Inference is split across three machines to keep the heavy model off the robot's
 - **Laptop (client node)** — subscribes to the three camera streams (`front_1`, `front_2`, `wrist`) and `/joint_states`, packages the 7D state and three RGB frames, and sends them to the policy server over a **WebSocket**. It receives a chunk of 50 actions, streams them out one block at a time (execute, wait for *done*, send the next), and re-queries once the chunk is spent.
 - **Franka computer** — runs **ROS 2 control**. `JointStateBroadcaster` publishes `/joint_states` (7 arm + 2 finger joints) at **1 kHz**, and the `fer_arm_controller/follow_joint_trajectory` action executes the policy's commands on the arm. Three RealSense cameras feed the client at **30 Hz**.
 
+The full client and execution stack lives in [openpi_franka_client](https://github.com/saifahmadgit/openpi_franka_client). Two details in that stack make the difference between a policy that runs and one that trips the robot's safety firmware:
+
+**Observation packing must mirror training exactly.** The policy consumes a **9-dim state** (7 arm joints + 2 finger joints), and the checkpoint's normalization statistics are 9-dimensional, so truncating to 8 would normalize the gripper against joint-7's statistics and silently corrupt the input. The three camera streams are likewise remapped to the server's bimanual-Aloha key convention (`cam_high`, `cam_left_wrist`, `cam_right_wrist`) exactly as the training-time transforms did — the client reproduces that mapping by hand, since those transforms never run at inference. The returned action array is padded to the bimanual action space; only the first 8 columns (7 joints + gripper) are meaningful and the rest is discarded.
+
+**Raw policy targets are time-parameterized before they reach the arm.** Pi 0.5 emits absolute joint targets with no notion of velocity or acceleration. Sent naively as a positions-only trajectory, the jump from the arm's *measured* position to the first target of a fresh chunk can imply velocities and accelerations well beyond the Franka's limits, tripping the firmware reflex that locks the robot into an error state. The executor instead assigns each trajectory segment a duration bounded by the joint velocity limits (with a floor at the trained step duration, so motion is never sped up), then iteratively stretches any segment that still violates the acceleration limits (since a ∝ 1/t², a segment is lengthened by √ratio), and attaches central-difference waypoint velocities so the controller interpolates smoothly. Limits are held at a conservative **10% of Franka's official per-joint maxima**. Because segment durations only ever *stretch*, the trained motion timing is preserved while every command stays inside the hardware envelope.
+
+The client streams each chunk out at a configurable `exec_horizon` — execute the full chunk, or only the first *k* steps before re-querying — trading control latency against observation freshness. The whole loop is **asynchronous**: ROS 2 callbacks spin on a multi-threaded executor while an asyncio loop queries the policy, dispatches the trajectory, and samples the true robot state in parallel for logging. The idle window while the next chunk is being computed is measured explicitly (and shaded in the time-series debug plot), since it is the main source of stall between action bursts; to keep that window from silently killing the connection, WebSocket keepalive pings are disabled so a slow inference call is never mistaken for a dead link.
+
 The same trained policy can also be **evaluated in simulation** (the MagicSim / Isaac Sim environment running on the server) before ever touching hardware, closing the loop between training and real-world deployment.
+
+### Deployment Analysis
+
+To verify that the policy's intent actually reaches the arm, the client logs the **commanded action** against the **measured robot state** at every step and plots them one-to-one. This is the single most useful debugging view during deployment: it separates *the policy is asking for the wrong thing* from *the controller is not tracking what the policy asks*.
+
+<img src="{{ '/assets/images/vla_deployment_analysis.png' | relative_url }}" alt="Per-joint commanded policy action vs actual robot state over a 400-step rollout" style="width:100%;height:auto;display:block;margin:16px 0;border-radius:8px;">
+
+Each panel overlays the **commanded** value from the Pi 0.5 policy (blue) and the **actual** joint state read back from the Franka (red) across a 400-step rollout, for all seven arm joints plus the gripper. The two traces sit nearly on top of each other for joints 1–6, confirming the `follow_joint_trajectory` controller tracks the chunked commands with negligible lag. The gripper panel (bottom) shows the command crossing the **close threshold (0.03 m)** around step 305, with the physical finger joint following a step later, the grasp event. The small residual offsets visible on joints 5 and 7 are exactly the kind of controller-side tracking error this plot is meant to surface, separate from any policy error.
 
 ## Current Status & Future Work
 
@@ -80,6 +96,14 @@ The next frontier is **contact-rich manipulation** — insertions, tool use, and
     <div>
       <div style="font-weight:700;font-size:1.1rem;margin-bottom:6px;">saifahmadgit / openpi_franka</div>
       <div style="font-size:0.95rem;color:#555;">Pi 0.5 fine-tuning fork with Franka configs</div>
+    </div>
+  </a>
+  <a href="https://github.com/saifahmadgit/openpi_franka_client" target="_blank" rel="noopener"
+     style="flex:1;min-width:280px;display:flex;align-items:flex-start;gap:18px;background:#eaecf4;border-radius:8px;padding:24px 28px;text-decoration:none;color:#111;">
+    <svg height="36" width="36" viewBox="0 0 16 16" fill="#111" style="flex-shrink:0;margin-top:3px;"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+    <div>
+      <div style="font-weight:700;font-size:1.1rem;margin-bottom:6px;">saifahmadgit / openpi_franka_client</div>
+      <div style="font-size:0.95rem;color:#555;">ROS 2 inference client &amp; execution pipeline</div>
     </div>
   </a>
 </div>
