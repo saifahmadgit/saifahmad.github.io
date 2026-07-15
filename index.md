@@ -3,7 +3,21 @@ layout: home
 title: Portfolio
 ---
 
-<!-- 1) Quadruped -->
+<!-- 1) VLA Sim-to-Real Franka -->
+<div class="project-row">
+  <div class="project-media">
+    <!-- TODO: replace with front demo gif at /assets/gifs/vla_sim2real.gif -->
+    <img src="{{ '/assets/images/vla_sim2real_flowchart.png' | relative_url }}" alt="VLA Sim-to-Real Manipulation on Franka" loading="lazy" style="width:100%;height:220px;object-fit:contain;background:#fff;">
+  </div>
+  <div class="project-info">
+    <p><a class="project-title-link" href="{{ site.baseurl }}/projects/vla-sim-to-real/"><strong>VLA Sim-to-Real Manipulation on Franka with Simulation-Only Training Data</strong></a></p>
+    <p class="project-tags"><span class="tag">VLA</span><span class="tag">Pi 0.5</span><span class="tag">Isaac Sim</span><span class="tag">cuRobo</span><span class="tag">ROS 2</span><span class="tag">Franka</span></p>
+    <p>Zero-shot sim-to-real transfer of a Vision-Language-Action policy on a real Franka arm, trained entirely on simulation data with zero human teleoperation. Demonstrations are auto-generated in Isaac Sim using cuRobo, Pi 0.5 is fine-tuned on domain-randomized lighting, camera poses, and object textures, and the policy is deployed through a ROS 2 inference pipeline.</p>
+    <p><a href="https://github.com/saifahmadgit/openpi_franka" target="_blank" rel="noopener">GitHub ↗</a></p>
+  </div>
+</div>
+
+<!-- 2) Quadruped -->
 <div class="project-row">
   <div class="project-media">
     <img src="{{ '/assets/gifs/RL_overview.gif' | relative_url }}" alt="Unitree Go2 RL Locomotion" loading="lazy">
