@@ -6,8 +6,7 @@ title: Portfolio
 <!-- 1) VLA Sim-to-Real Franka -->
 <div class="project-row">
   <div class="project-media">
-    <!-- TODO: replace with front demo gif at /assets/gifs/vla_sim2real.gif -->
-    <img src="{{ '/assets/images/vla_sim2real_flowchart.png' | relative_url }}" alt="VLA Sim-to-Real Manipulation on Franka" loading="lazy" style="width:100%;height:220px;object-fit:contain;background:#fff;">
+    <img src="{{ '/assets/gifs/SIm_to_Real_Pi0p5_3Objects.gif' | relative_url }}" alt="VLA Sim-to-Real Manipulation on Franka" loading="lazy">
   </div>
   <div class="project-info">
     <p><a class="project-title-link" href="{{ site.baseurl }}/projects/vla-sim-to-real/"><strong>VLA Sim-to-Real Manipulation on Franka with Simulation-Only Training Data</strong></a></p>

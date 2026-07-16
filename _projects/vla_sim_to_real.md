@@ -3,13 +3,13 @@ layout: project
 title: VLA Sim-to-Real Manipulation on Franka with Simulation-Only Training Data
 order: 1
 tech_tags: "VLA, Pi 0.5, GR00T N1.7, ACT, Isaac Sim, cuRobo, ROS 2, Franka"
-gif: /assets/gifs/vla_sim2real.gif
+gif: /assets/gifs/SIm_to_Real_Pi0p5_3Objects.gif
 ---
 
 <p style="color:#555;font-size:0.95rem;margin:0 0 20px;">Apr 2026 – Present</p>
 
 <iframe class="video"
-        src="https://www.youtube.com/embed/w7xpKEQse_U"
+        src="https://www.youtube.com/embed/0RFVNuVx2gY"
         title="VLA Sim-to-Real Manipulation on Franka"
         frameborder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
