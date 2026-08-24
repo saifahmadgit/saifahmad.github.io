@@ -27,6 +27,61 @@ This project removes the human from that loop. **Pi 0.5** is fine-tuned entirely
 
 Demonstrations are generated entirely in **Isaac Sim** with no teleoperation. Grasp poses are precomputed for each asset from its geometry and inertial properties, and **cuRobo** plans collision-free motions to reach them, so a full demonstration is produced without a human in the loop. **Domain randomization** over lighting, textures, and backgrounds widens the training distribution until the real scene falls inside it. The resulting dataset is used to fine-tune **Pi 0.5**, and the policy runs on the real Franka through a **ROS 2** inference pipeline.
 
+### Data Collection
+
+Demonstrations are collected in **Isaac Sim** for **15 objects**, each episode paired with a **randomized prompt**, so the trained policy can be told which object to pick up rather than always reaching for the same one. **cuRobo** plans the collision-free motion, and the grasp pose is computed from each object's geometry and inertial properties, so no human ever drives the arm.
+
+**PhysX** steps at **60 Hz** while rendering runs at **30 Hz**. Both streams are recorded at **30 Hz**, converted to the **LeRobot v2.1** dataset format, and pushed to the Hugging Face Hub. Generation runs on a single **NVIDIA RTX 6000 Ada Generation**, producing one 10 second episode roughly every 2 minutes.
+
+#### Asset Preparation
+
+Objects are taken from **GraspNet** and converted to **USD**. Each one ships as a photogrammetry scan of 0.5 M to 1.5 M triangles, far too heavy to simulate directly. The scan is decimated by quadric edge collapse to 40 k faces with UVs preserved, then again to 2 000 faces in a final optimization pass. That is roughly a 500x reduction, with bounding box drift held under 0.1 mm so the original grasp annotations remain valid in the object's local frame.
+
+The visual mesh, the PhysX collider, and the cuRobo planning obstacle are all derived from this same decimated mesh, so what the renderer draws, what physics collides against, and what the planner avoids can never quietly disagree. Visual fidelity does take a hit at 2 000 faces, but domain randomization is already forcing the policy off surface detail and onto geometry and context, so the trade buys a large simulation speedup for little that the policy relies on.
+
+For collision, the default convex decomposition (500 k voxel resolution, 32 hulls) is replaced with a coarsened one: **20 k voxels, 16 hulls, 32 vertices per hull**, shrink-wrapped onto the true surface. Any object whose convexity exceeds **0.90** is then swapped for a single convex hull, while concave shapes such as cups and limbed toys keep the full decomposition. Physics uses PhysX defaults, with mass computed from density times volume, since GraspNet ships no per-object masses.
+
+### Domain Randomization
+
+Every parameter below is resampled per episode during data generation. The frozen column is the fixed-condition baseline used to isolate how much of the transfer is actually bought by randomization.
+
+<div class="table-wrap" markdown="1">
+
+| Parameter | DR off (frozen) | DR on |
+|---|---|---|
+| HDRI backdrop | 1 texture (`kloofendal_48d_partly_cloudy`) | 8 textures, sampled per episode |
+| HDRI intensity | 1000 | 600 to 2500 |
+| Light position (x, y, z) m | (0, 0, 2.0) | x, y &isin; &plusmn;0.6; z &isin; 1.7 to 2.3 |
+| Light orientation (r, p, y) &deg; | (0, 0, 0) | r, p &isin; &plusmn;20; yaw &isin; &plusmn;180 |
+| Light intensity | 800 | 150 to 1600 |
+| Light size (w &times; h) m | 1.0 &times; 1.0 | 0.15 to 2.5 each, log-uniform |
+| Color temperature K | 5500 | 3000 to 8000 |
+| Light color (RGB mult.) | (1.0, 1.0, 1.0) | 0.85 to 1.0 per channel |
+| Table albedo | 1 grey (0.88, 0.86, 0.82) | 5 greys, 0.74 to 0.95 |
+| Backdrop plates | 1 color | 1 color (not randomized) |
+| Table material | `Material/Garment` | `Material/Garment` (same) |
+
+</div>
+
+### Training
+
+Training uses a fork of **openpi** with a custom configuration. The model is conditioned on the robot state and three camera streams, and predicts **deltas in joint angles** rather than absolute targets. It trains on an **NVIDIA H100** in a cluster at roughly **1.3 s per step**.
+
+### Inference and Deployment
+
+Inference runs on a workstation with an **NVIDIA RTX 6000 Ada Generation (48 GB)**. The laptop connected to the robot streams camera frames and robot state to that server over a **WebSocket** and receives action chunks back, driving a **Franka FER** arm at **10 Hz**.
+
+Continuous motion comes from **real-time chunking (RTC)**. The usual loop is infer, execute 50 actions, stop, infer again, which leaves the arm stationary for the length of every inference call. Instead, the client fires the next inference while the arm is still moving and sends the currently executing chunk back with the request, so the policy samples a chunk that agrees with motion already committed. No pause, and no jerk at chunk boundaries.
+
+Doubling the control rate exposed two artifacts that had been harmless at the slower rate. Both are fixed amplitudes in radians, so the acceleration they imply scales as 1/&Delta;t&sup2;: halving the step time quadruples the disturbance.
+
+- **Savitzky-Golay smoothing** across each chunk. 27% of consecutive policy deltas reverse sign, which is invisible at 0.15 s per step but becomes 4.7 rad/s&sup2; of buzz at 0.075 s.
+- **Raised-cosine splice blending** over the roughly 0.022 rad the server leaves unpinned. The server applies soft prefix attention across the overlap rather than a hard freeze, so the boundary is worth measuring rather than assuming.
+
+Everything here is measured rather than guessed: per-splice discontinuity, round-trip p95 latency, dropped deadlines, and joint logs sampled at the driver's native **1.4 kHz** instead of on a policy tick. A 10 Hz tick aliases away the entire frequency band that vibration lives in.
+
+**References:** [Real-Time Execution of Action Chunking Flow Policies](https://arxiv.org/abs/2506.07339) (Black, Galliker &amp; Levine, NeurIPS 2025) &middot; [Physical-Intelligence/openpi](https://github.com/Physical-Intelligence/openpi) &middot; [scipy.signal.savgol_filter](https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.savgol_filter.html)
+
 ## Results and Analysis
 
 The fine-tuned policy transfers **zero-shot** to the real Franka, reaching an **80% grasp success rate across 15 different objects** without a single real-world demonstration.
