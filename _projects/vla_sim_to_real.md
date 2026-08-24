@@ -17,9 +17,27 @@ gif: /assets/gifs/Pi_0.5_fine_tuning_with_Sim_only_Data.gif
 
 ## Overview
 
-Robotics foundation models now outperform task-specific policies across a wide range of manipulation problems. None of the open-weight ones, however, work zero-shot on a robot they have never seen. Each needs demonstrations from the exact setup it will be deployed on — that embodiment, those cameras, that mounting geometry — and those demonstrations are almost always collected by a human teleoperating the arm, one trajectory at a time. It is slow and expensive, and the cost is paid again from scratch for every new task, gripper, or camera placement.
+Robotics foundation models now outperform task-specific policies across a wide range of manipulation problems. None of the open-weight ones, however, work zero-shot on a robot they have never seen. Each needs demonstrations from the exact setup it will be deployed on: that embodiment, those cameras, that mounting geometry. Those demonstrations are almost always collected by a human teleoperating the arm, one trajectory at a time. It is slow and expensive, and the cost is paid again from scratch for every new task, gripper, or camera placement.
 
-This project removes the human from that loop. **Pi 0.5** is fine-tuned entirely on demonstrations generated in **NVIDIA Isaac Sim**, with **cuRobo** planning the motions, and the resulting policy is deployed **zero-shot on a real Franka** — no teleoperation, and no real-world data at any stage.
+This project removes the human from that loop. **Pi 0.5** is fine-tuned entirely on demonstrations generated in **NVIDIA Isaac Sim**, with **cuRobo** planning the motions, and the resulting policy is deployed **zero-shot on a real Franka**, with no teleoperation and no real-world data at any stage.
+
+## Pipeline
+
+<img src="{{ '/assets/images/blockDiagram_Pi0.5_Sim_to_Real.png' | relative_url }}" alt="End-to-end pipeline from Isaac Sim data generation to real Franka deployment" style="width:100%;height:auto;display:block;margin:16px 0;border-radius:8px;">
+
+Demonstrations are generated entirely in **Isaac Sim** with no teleoperation. Grasp poses are precomputed for each asset from its geometry and inertial properties, and **cuRobo** plans collision-free motions to reach them, so a full demonstration is produced without a human in the loop. **Domain randomization** over lighting, textures, and backgrounds widens the training distribution until the real scene falls inside it. The resulting dataset is used to fine-tune **Pi 0.5**, and the policy runs on the real Franka through a **ROS 2** inference pipeline.
+
+## Results and Analysis
+
+The fine-tuned policy transfers **zero-shot** to the real Franka, reaching an **80% grasp success rate across 15 different objects** without a single real-world demonstration.
+
+<img src="{{ '/assets/images/vla_deployment_analysis.png' | relative_url }}" alt="Per-joint commanded policy action versus measured robot state over a rollout" style="width:100%;height:auto;display:block;margin:16px 0;border-radius:8px;">
+
+Each panel overlays the **commanded** action from the policy against the **measured** joint state read back from the robot, for all seven arm joints plus the gripper. Keeping these side by side separates the two failure modes that otherwise look identical on hardware: the policy asking for the wrong thing, and the controller failing to track what the policy asked for.
+
+## Future Work
+
+The next step is **contact-rich manipulation**, where interaction forces rather than the visual scene decide success. Contact dynamics are the hardest thing for a simulator to get right, so the open question is how far simulation-only data can be pushed before real-world contact data becomes unavoidable.
 
 ## Code
 
