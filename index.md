@@ -11,7 +11,7 @@ title: Portfolio
   <div class="project-info">
     <p><a class="project-title-link" href="{{ site.baseurl }}/projects/vla-sim-to-real/"><strong>Fine-Tuning a Robotics Foundation Model with Simulation-Only Data</strong></a></p>
     <p class="project-tags"><span class="tag">VLA</span><span class="tag">Pi 0.5</span><span class="tag">Isaac Sim</span><span class="tag">cuRobo</span><span class="tag">ROS 2</span><span class="tag">Franka</span></p>
-    <p>Fine-tuned the Pi 0.5 vision-language-action model on simulation-only data and deployed it zero-shot on a real Franka arm, reaching an <strong>80% grasp success rate across 15 different objects</strong> with zero human teleoperation. Training demonstrations were generated automatically in Isaac Sim, where cuRobo planned collision-free motions to grasp poses precomputed from each asset's geometry and inertial properties. Domain randomization over lighting, textures, and backgrounds closed the sim-to-real gap.</p>
+    <p>Fine-tuned Pi 0.5 on simulation-only data and deployed it zero-shot on a real Franka, reaching <strong>80% grasp success across 15 objects</strong> with no teleoperation. Demonstrations are generated in Isaac Sim with cuRobo, and domain randomization over light, texture, background, and camera pose closes the sim-to-real gap.</p>
     <p><a href="https://github.com/saifahmadgit/openpi_franka" target="_blank" rel="noopener">GitHub ↗</a></p>
   </div>
 </div>
