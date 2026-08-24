@@ -15,6 +15,12 @@ gif: /assets/gifs/Pi_0.5_fine_tuning_with_Sim_only_Data.gif
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowfullscreen></iframe>
 
+## Overview
+
+Robotics foundation models now outperform task-specific policies across a wide range of manipulation problems. None of the open-weight ones, however, work zero-shot on a robot they have never seen. Each needs demonstrations from the exact setup it will be deployed on — that embodiment, those cameras, that mounting geometry — and those demonstrations are almost always collected by a human teleoperating the arm, one trajectory at a time. It is slow and expensive, and the cost is paid again from scratch for every new task, gripper, or camera placement.
+
+This project removes the human from that loop. **Pi 0.5** is fine-tuned entirely on demonstrations generated in **NVIDIA Isaac Sim**, with **cuRobo** planning the motions, and the resulting policy is deployed **zero-shot on a real Franka** — no teleoperation, and no real-world data at any stage.
+
 ## Code
 
 <div style="display:flex;gap:20px;flex-wrap:wrap;margin:20px 0;width:100%;">
