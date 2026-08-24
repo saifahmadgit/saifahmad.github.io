@@ -6,12 +6,12 @@ title: Portfolio
 <!-- 1) VLA Sim-to-Real Franka -->
 <div class="project-row">
   <div class="project-media">
-    <img src="{{ '/assets/gifs/SIm_to_Real_Pi0p5_3Objects.gif' | relative_url }}" alt="VLA Sim-to-Real Manipulation on Franka" loading="lazy">
+    <img src="{{ '/assets/gifs/Pi_0.5_fine_tuning_with_Sim_only_Data.gif' | relative_url }}" alt="Fine-Tuning a Robotics Foundation Model with Simulation-Only Data" loading="lazy">
   </div>
   <div class="project-info">
-    <p><a class="project-title-link" href="{{ site.baseurl }}/projects/vla-sim-to-real/"><strong>VLA Sim-to-Real Manipulation on Franka with Simulation-Only Training Data</strong></a></p>
+    <p><a class="project-title-link" href="{{ site.baseurl }}/projects/vla-sim-to-real/"><strong>Fine-Tuning a Robotics Foundation Model with Simulation-Only Data</strong></a></p>
     <p class="project-tags"><span class="tag">VLA</span><span class="tag">Pi 0.5</span><span class="tag">Isaac Sim</span><span class="tag">cuRobo</span><span class="tag">ROS 2</span><span class="tag">Franka</span></p>
-    <p>Zero-shot sim-to-real transfer of a Vision-Language-Action policy on a real Franka arm, trained entirely on simulation data with zero human teleoperation. Demonstrations are auto-generated in Isaac Sim using cuRobo, Pi 0.5 is fine-tuned on domain-randomized lighting, camera poses, and object textures, and the policy is deployed through a ROS 2 inference pipeline.</p>
+    <p>Fine-tuned the Pi 0.5 vision-language-action model on simulation-only data and deployed it zero-shot on a real Franka arm, reaching an <strong>80% grasp success rate across 15 different objects</strong> with zero human teleoperation. Training demonstrations were generated automatically in Isaac Sim, where cuRobo planned collision-free motions to grasp poses precomputed from each asset's geometry and inertial properties. Domain randomization over lighting, textures, and backgrounds closed the sim-to-real gap.</p>
     <p><a href="https://github.com/saifahmadgit/openpi_franka" target="_blank" rel="noopener">GitHub ↗</a></p>
   </div>
 </div>
