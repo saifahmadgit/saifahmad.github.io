@@ -270,3 +270,9 @@ a:hover {
 }
 .figure { max-width: min(100%, 680px); }
 .figure-wide { max-width: min(100%, 940px); }
+
+/* ---- Side-by-side figures ---- */
+.figure-pair { display: flex; flex-wrap: wrap; gap: 20px; margin: 24px 0; align-items: flex-start; }
+.figure-pair figure { flex: 1 1 320px; min-width: 0; margin: 0; }
+.figure-pair img { width: 100%; height: auto; display: block; border-radius: 8px; }
+.figure-pair figcaption { margin-top: 8px; font-size: 0.88rem; color: #555; }

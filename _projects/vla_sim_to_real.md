@@ -17,13 +17,13 @@ gif: /assets/gifs/FinalProject.gif
 
 ## Overview
 
-Robotics foundation models are the strongest starting point we have for manipulation. What none of the open-weight ones do is arrive ready for your robot. Unless your setup happens to match a configuration already in the pretraining mix, the model needs demonstrations from that exact embodiment: those cameras, that mounting geometry, that gripper. Those demonstrations come from a human teleoperating the arm, one trajectory at a time, and the bill is paid again for every new task, gripper, or camera placement.
+Robotics foundation models are the strongest starting point we have for manipulation, but none of the open-weight ones arrive ready for your robot. Unless your setup matches something already in the pretraining mix, the model needs demonstrations from that exact embodiment: those cameras, that mounting geometry, that gripper. They come from a human teleoperating the arm one trajectory at a time, and the whole collection is repeated for every new task, gripper, or camera placement.
 
-This project removes the human from that loop. **Pi 0.5** is fine-tuned entirely on demonstrations generated in **NVIDIA Isaac Sim**, with **cuRobo** planning the motions, then deployed **zero-shot on a real Franka**, with no teleoperation and not one frame of data from the real setup. The task is picking: the policy is given an object's name and has to pick it up off the table. It succeeds 90% of the time on hardware it has never seen.
+This project removes the human from that loop. **Pi 0.5** is fine-tuned entirely on demonstrations generated in **NVIDIA Isaac Sim**, with **cuRobo** planning the motions, then deployed **zero-shot on a real Franka**, with no teleoperation and not one frame of data from the real setup. The task is picking: the policy is given an object's name and has to pick it up off the table. It succeeds 80% of the time on hardware it has never seen.
 
-Picking is decided by vision. The gripper has to arrive at the right position and orientation, and the only evidence for where the object is comes from the cameras, so a miss is unambiguous and the success rate is a clean readout on whether the transfer held. The simulation does not have to look real. It has to vary enough that a real camera image looks like one more variation the policy has already learned to ignore. That is why the same recipe should carry to **visually guided manipulation** in general, to any task where success also comes down to what the cameras see and how precisely the arm can be placed from it: stacking, placing, aligning a tool to a fixture.
+Picking is decided by vision. The gripper has to arrive at the right position and orientation, and the only evidence for where the object is comes from the cameras, so the success rate is a clean readout on whether the transfer held. The simulation does not have to look real. It has to vary enough that a real camera image is one more variation the policy has already learned to ignore, which is why the same recipe should carry to **visually guided manipulation** in general: stacking, placing, aligning a tool to a fixture.
 
-The second question is what this costs in data. Simulated episodes are cheap, but training has to span a wide range of lighting, textures and camera placements rather than the single real setup, and that coverage costs episodes. The measurement: 130 demonstrations to learn the task in simulation, and 650 to carry it onto the real robot. Five times as many, not fifty. The surcharge turns out to be per-dataset rather than per-task: eight objects trained together reach 80% on the real robot for roughly what the single task cost on its own.
+What that costs in data is measured below. 130 demonstrations teach the task in simulation, 5 times as many carry it onto the real robot, and that extra data is not needed again once several tasks share a dataset.
 
 ## Pipeline
 
@@ -62,25 +62,30 @@ Joint logs are sampled at the driver's native **1.4 kHz**, not on the 10 Hz poli
 
 The question is how many demonstrations a task needs. Sim-to-sim transfer answers it first: train in simulation, test in simulation on placements the policy was never shown, and read off the episode count where it starts working. That number is the baseline, and the sim-to-real budget is measured against it.
 
-Two objects set the scale. A cylinder has to be gripped near its centre or it slips, so picking it up measures precision in x and y alone. A cuboid adds yaw, since it has to be approached along the right axis as well. The gap between the two is the price of one extra degree of freedom, which makes it possible to estimate the budget for tasks with longer trajectories or several valid ways to succeed.
+Two objects set the scale. A cylinder has to be gripped near its centre or it slips, so picking it up measures precision in x and y alone. A cuboid adds yaw, since it has to be approached along the right axis as well. The difference between them is what one extra degree of freedom requires, which gives a basis for estimating tasks with longer trajectories or several valid ways to succeed.
 
 ### Sim-to-Sim Baseline
 
 The task is picking a 4 cm cylinder off a 50 by 15 cm patch of table, scored at positions the policy was never shown.
 
-<img src="{{ '/assets/images/reach_map.png' | relative_url }}" alt="Grasp success across the table for the cylinder under three demonstration layouts" class="figure">
+<div class="figure-pair">
+  <figure>
+    <img src="{{ '/assets/images/reach_map.png' | relative_url }}" alt="Grasp success across the table for the cylinder under three demonstration layouts">
+    <figcaption>Position. Three layouts of demonstration sites across the patch.</figcaption>
+  </figure>
+  <figure>
+    <img src="{{ '/assets/images/angles_map.png' | relative_url }}" alt="Grasp success across cuboid yaw angles for three ways of distributing the same 130 episodes">
+    <figcaption>Orientation. Three ways of distributing the same 130 episodes across cuboid yaw.</figcaption>
+  </figure>
+</div>
 
 Five demonstration sites at 10 episodes each is 50 episodes, and the policy drops half the objects it is asked for in the spaces between those sites. Thirteen sites demonstrated once each is 13 episodes, a quarter of the data, and it picks up the object in every gap it is tested in. Returning to collect 5 episodes at each of those same 13 sites, 65 in total, changes nothing. It was already at 100% and stays there.
 
-What separates the two is not how much data there is but how far any point on the table sits from the nearest demonstration. Five sites leave a worst spot nearly 14 cm from anything the policy was shown. Thirteen bring that under 7 cm, less than two object widths, and below that distance the policy fills in the gap on its own. More episodes at positions it already knows buy nothing.
+What separates the two is not how much data there is but how far any point on the table sits from the nearest demonstration. Five sites leave a worst spot nearly 14 cm from anything the policy was shown. Thirteen bring that under 7 cm, less than two object widths, and below that distance the policy fills in the gap on its own. More episodes at positions it already knows add nothing.
 
-Orientation behaves the same way, and the second figure holds the budget fixed to show it.
+Orientation behaves the same way, and the second figure holds the data size fixed to show it. All three conditions cost the same 130 episodes, 13 sites at 10 episodes each, and differ only in how those 10 are spread across the cuboid's yaw. Two angles, flat and side-on, fails 60% of the time when the object lies at anything else. Four angles handles a little over three quarters. Drawing a fresh angle every episode, so no orientation is taught twice and the largest untaught gap closes to under 9 degrees, handles all of them. Same episode count, three ways of distributing it, and only the last produces a policy that treats orientation as a continuous quantity rather than a short list of memorised poses.
 
-<img src="{{ '/assets/images/angles_map.png' | relative_url }}" alt="Grasp success across cuboid yaw angles for three ways of spending the same 130 episodes" class="figure">
-
-All three conditions cost the same 130 episodes, 13 sites at 10 episodes each, and differ only in how those 10 are spread across the cuboid's yaw. Two angles, flat and side-on, fails 60% of the time when the object lies at anything else. Four angles handles a little over three quarters. Drawing a fresh angle every episode, so no orientation is taught twice and the largest untaught gap closes to under 9 degrees, handles all of them. Same episode count, three ways of spending it, and only the last produces a policy that treats orientation as a continuous quantity rather than a short list of memorised poses.
-
-Coverage is the expensive thing, not volume. 13 episodes were enough for position and 130 for orientation because in each case the demonstrations were spread finer than the tolerance the task needs. Once they are, collecting more of them is money spent on nothing.
+What matters is coverage, not volume. 13 episodes were enough for position and 130 for orientation because in each case the demonstrations were spread finer than the tolerance the task needs. Once they are, collecting more of them changes nothing.
 
 ### Sim-to-Real: The Extra Data
 
@@ -92,17 +97,17 @@ The failures say more than the number. It was not reaching for the object and mi
 
 Tripling the data to 390 episodes moved it to 60%, and the catastrophic failures were gone. Every failure at that budget was a reach that missed or a lift that lost the object. The failure mode changed a full step before the success rate finished moving, so a policy at 60% with no crashes is much closer to done than the same 60% would have been earlier. At 650 episodes, 5 times what the task needed in simulation, it reached 90%, essentially the simulation number.
 
-Five times, not fifty. The original budget assumed the policy has to see the combinations of everything being randomized, and that assumption is wrong. At 650 episodes, 87% of the possible sky, table, object colour and position combinations never occurred once, and the policy scored 90% anyway. Each setting only has to be covered on its own, and since every episode redraws every setting at once, a few hundred episodes cover all twelve ranges simultaneously: 96% of each range by 130 episodes, 99% by 650.
+Five times, not fifty. The original estimate assumed the policy has to see the combinations of everything being randomized, and that assumption is wrong. At 650 episodes, 87% of the possible sky, table, object colour and position combinations never occurred once, and the policy scored 90% anyway. Each setting only has to be covered on its own, and since every episode redraws every setting at once, a few hundred episodes cover all twelve ranges simultaneously: 96% of each range by 130 episodes, 99% by 650.
 
-That arithmetic explains why the surcharge is small. It does not explain why it is 5 and not 1. By 130 episodes there are no meaningful holes left in any range, and 130 is exactly where the real robot was still driving into the table. The 650 is measured, not derived. My reading is that covering a range and learning to ignore it are different purchases and the second is the expensive one, but that is an interpretation, and the ablation that would settle it, 650 episodes with the randomization ranges collapsed, has not been run.
+That arithmetic explains why the extra data is small. It does not explain why it is 5 and not 1. By 130 episodes there are no meaningful holes left in any range, and 130 is exactly where the real robot was still driving into the table. The 650 is measured, not derived. My reading is that covering a range and learning to ignore it are different problems, and the second needs more data, but that is an interpretation, and the ablation that would settle it, 650 episodes with the randomization ranges collapsed, has not been run.
 
-The last result changes what any of this costs. Spread the same 650 episode budget across 8 objects instead of 1 and the real robot still runs at 80%, with no catastrophic failures anywhere. The surcharge was never per task. Every episode of every task pays into the same account because the randomization they draw from is shared, so the bill arrives once for the dataset and the ninth task does not pay it again. If you already have a large multi-task dataset collected under randomization, you have already paid for transfer, and new collection should go on new tasks.
+The last result changes what this means in practice. Spread the same 650 episode budget across 8 objects instead of 1 and the real robot still runs at 80%, with no catastrophic failures anywhere. The extra data was never per task. Every episode of every task samples the same randomization, so the requirement applies once to the dataset and a ninth task does not add to it. If you already have a large multi-task dataset collected under randomization, the randomization needed for transfer is already covered, and new collection should go on new tasks.
 
 ### Conclusion
 
 Closing the visual gap takes on the order of 600 episodes, enough to cover the randomization in light, camera angle, texture and background. Once several tasks are trained together, each needing roughly that many episodes anyway, the simulation budget is not much larger in episode count than real collection would have been.
 
-More varied tasks and harder trajectories need more data, which is equally true of collecting on real hardware. What the analysis buys is the ability to decide how far to scale rather than guess. A mustard bottle has several valid grasp modes and awkward approaches. A facewash bottle is tapered, so a top-down grasp slips off it. cuRobo returns different trajectories for the same grasp pose depending on how close the object sits to the robot base. Each of those adds trajectory variety that has to be paid for in episodes.
+More varied tasks and harder trajectories need more data, which is equally true of collecting on real hardware. The analysis is what makes scaling a decision rather than a guess. A mustard bottle has several valid grasp modes and awkward approaches. A facewash bottle is tapered, so a top-down grasp slips off it. cuRobo returns different trajectories for the same grasp pose depending on how close the object sits to the robot base. Each of those adds trajectory variety, and that needs more episodes.
 
 Scaled on that basis, 15 objects over a wider range of trajectories at 10 000 episodes reaches nearly 80% on the real robot, with recoveries and with grasps at positions and orientations the policy was never trained on. Objects that were never in the dataset at all also work, provided their geometry is close to something that was.
 
