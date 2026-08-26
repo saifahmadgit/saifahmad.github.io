@@ -60,13 +60,13 @@ Joint logs are sampled at the driver's native **1.4 kHz**, not on the 10 Hz poli
 
 ## Results and Analysis
 
-The question is how many demonstrations a task needs. Sim-to-sim transfer answers it first: train in simulation, test in simulation on placements the policy was never shown, and read off the episode count where it starts working. That number is the baseline, and the sim-to-real budget is measured against it.
+How many demonstrations does a task need? Sim-to-sim answers that first: train in simulation, test on placements the policy was never shown, and read off the episode count where it starts working. That is the baseline the sim-to-real requirement is measured against.
 
-Two objects set the scale. A cylinder has to be gripped near its centre or it slips, so picking it up measures precision in x and y alone. A cuboid adds yaw, since it has to be approached along the right axis as well. The difference between them is what one extra degree of freedom requires, which gives a basis for estimating tasks with longer trajectories or several valid ways to succeed.
+Two objects set the scale. A cylinder has to be gripped near its centre or it slips, so it measures precision in x and y. A cuboid adds yaw. The difference between them is what one extra degree of freedom requires.
 
 ### Sim-to-Sim Baseline
 
-The task is picking a 4 cm cylinder off a 50 by 15 cm patch of table, scored at positions the policy was never shown.
+Picking a 4 cm cylinder off a 50 by 15 cm patch of table, scored at positions the policy was never shown.
 
 <div class="figure-pair">
   <figure>
@@ -79,37 +79,37 @@ The task is picking a 4 cm cylinder off a 50 by 15 cm patch of table, scored at 
   </figure>
 </div>
 
-Five demonstration sites at 10 episodes each is 50 episodes, and the policy drops half the objects it is asked for in the spaces between those sites. Thirteen sites demonstrated once each is 13 episodes, a quarter of the data, and it picks up the object in every gap it is tested in. Returning to collect 5 episodes at each of those same 13 sites, 65 in total, changes nothing. It was already at 100% and stays there.
+Five sites at 10 episodes each, 50 in total, drops half the objects in the gaps between sites. Thirteen sites at one episode each, a quarter of the data, picks up the object in every gap it is tested in. Five episodes at each of those same 13 sites, 65 in total, changes nothing. It was already at 100%.
 
-What separates the two is not how much data there is but how far any point on the table sits from the nearest demonstration. Five sites leave a worst spot nearly 14 cm from anything the policy was shown. Thirteen bring that under 7 cm, less than two object widths, and below that distance the policy fills in the gap on its own. More episodes at positions it already knows add nothing.
+What separates them is not the amount of data but the distance from any point on the table to the nearest demonstration. Five sites leave a worst spot nearly 14 cm away. Thirteen bring that under 7 cm, less than two object widths, and below that distance the policy fills in the gap on its own.
 
-Orientation behaves the same way, and the second figure holds the data size fixed to show it. All three conditions cost the same 130 episodes, 13 sites at 10 episodes each, and differ only in how those 10 are spread across the cuboid's yaw. Two angles, flat and side-on, fails 60% of the time when the object lies at anything else. Four angles handles a little over three quarters. Drawing a fresh angle every episode, so no orientation is taught twice and the largest untaught gap closes to under 9 degrees, handles all of them. Same episode count, three ways of distributing it, and only the last produces a policy that treats orientation as a continuous quantity rather than a short list of memorised poses.
+Orientation behaves the same way at fixed data size. All three conditions are 130 episodes, 13 sites at 10 each, differing only in how those 10 spread across the cuboid's yaw. Two angles fails 60% of the time at anything else. Four angles handles a little over three quarters. A fresh angle every episode, closing the largest untaught gap to under 9 degrees, handles all of them.
 
-What matters is coverage, not volume. 13 episodes were enough for position and 130 for orientation because in each case the demonstrations were spread finer than the tolerance the task needs. Once they are, collecting more of them changes nothing.
+Coverage, not volume. 13 episodes for position and 130 for orientation were enough because the demonstrations were spread finer than the tolerance the task needs. Past that, more of them change nothing.
 
 ### Sim-to-Real: The Extra Data
 
-Everything above happened in simulation. Moving the same policy onto the real Franka, with nothing changed but the robot, it picked up 3 objects in 10.
+On the real Franka, with nothing changed but the robot, the same policy picked up 3 objects in 10.
 
 <img src="{{ '/assets/images/sim_to_real.png' | relative_url }}" alt="Real robot grasp success against episode budget, with failure mode at each budget" class="figure">
 
-The failures say more than the number. It was not reaching for the object and missing, it was driving the gripper into the table. That is what a policy does when it has no idea where the object is, not one that is slightly off, and it is why a 30% success rate at this stage tells you nothing about how far from working you are.
+The failures say more than the number. It was not reaching for the object and missing, it was driving the gripper into the table, which is what a policy does when it has no idea where the object is. A 30% success rate here tells you nothing about how far from working you are.
 
-Tripling the data to 390 episodes moved it to 60%, and the catastrophic failures were gone. Every failure at that budget was a reach that missed or a lift that lost the object. The failure mode changed a full step before the success rate finished moving, so a policy at 60% with no crashes is much closer to done than the same 60% would have been earlier. At 650 episodes, 5 times what the task needed in simulation, it reached 90%, essentially the simulation number.
+At 390 episodes the rate is 60% and the catastrophic failures are gone. Every failure is a missed reach or a dropped lift. The failure mode changed a full step before the success rate finished moving. At 650 episodes, 5 times what the task needed in simulation, it reaches 90%, essentially the simulation number.
 
-Five times, not fifty. The original estimate assumed the policy has to see the combinations of everything being randomized, and that assumption is wrong. At 650 episodes, 87% of the possible sky, table, object colour and position combinations never occurred once, and the policy scored 90% anyway. Each setting only has to be covered on its own, and since every episode redraws every setting at once, a few hundred episodes cover all twelve ranges simultaneously: 96% of each range by 130 episodes, 99% by 650.
+Five times, not fifty. The original estimate assumed the policy has to see the combinations of everything being randomized. At 650 episodes, 87% of the sky, table, object colour and position combinations never occurred once, and it scored 90% anyway. Each setting only has to be covered on its own, and every episode redraws all of them at once: 96% of each range by 130 episodes, 99% by 650.
 
-That arithmetic explains why the extra data is small. It does not explain why it is 5 and not 1. By 130 episodes there are no meaningful holes left in any range, and 130 is exactly where the real robot was still driving into the table. The 650 is measured, not derived. My reading is that covering a range and learning to ignore it are different problems, and the second needs more data, but that is an interpretation, and the ablation that would settle it, 650 episodes with the randomization ranges collapsed, has not been run.
+That explains why the extra data is small, not why it is 5 and not 1. By 130 episodes no meaningful holes are left in any range, and 130 is where the real robot was still driving into the table. The 650 is measured, not derived. My reading is that covering a range and learning to ignore it are different problems and the second needs more data, but that is an interpretation, and the ablation that would settle it, 650 episodes with the randomization ranges collapsed, has not been run.
 
-The last result changes what this means in practice. Spread the same 650 episode budget across 8 objects instead of 1 and the real robot still runs at 80%, with no catastrophic failures anywhere. The extra data was never per task. Every episode of every task samples the same randomization, so the requirement applies once to the dataset and a ninth task does not add to it. If you already have a large multi-task dataset collected under randomization, the randomization needed for transfer is already covered, and new collection should go on new tasks.
+Spread the same 650 episodes across 8 objects instead of 1 and the real robot still runs at 80%, with no catastrophic failures. Every episode of every task samples the same randomization, so the requirement applies once to the dataset rather than per task. With a large multi-task dataset collected under randomization, transfer is already covered and new collection should go on new tasks.
 
 ### Conclusion
 
-Closing the visual gap takes on the order of 600 episodes, enough to cover the randomization in light, camera angle, texture and background. Once several tasks are trained together, each needing roughly that many episodes anyway, the simulation budget is not much larger in episode count than real collection would have been.
+Around 600 episodes covers the randomization in light, camera angle, texture and background. With several tasks trained together, each needing roughly that many anyway, the simulation budget is close to what real collection would have cost in episodes.
 
-More varied tasks and harder trajectories need more data, which is equally true of collecting on real hardware. The analysis is what makes scaling a decision rather than a guess. A mustard bottle has several valid grasp modes and awkward approaches. A facewash bottle is tapered, so a top-down grasp slips off it. cuRobo returns different trajectories for the same grasp pose depending on how close the object sits to the robot base. Each of those adds trajectory variety, and that needs more episodes.
+Harder trajectories need more data, in simulation as on hardware. The analysis is what makes scaling a decision rather than a guess. A mustard bottle has several valid grasp modes. A facewash bottle is tapered, so a top-down grasp slips off it. cuRobo returns different trajectories for the same grasp pose depending on how close the object sits to the robot base. Each adds trajectory variety, and that needs more episodes.
 
-Scaled on that basis, 15 objects over a wider range of trajectories at 10 000 episodes reaches nearly 80% on the real robot, with recoveries and with grasps at positions and orientations the policy was never trained on. Objects that were never in the dataset at all also work, provided their geometry is close to something that was.
+Scaled that way, 15 objects at 10 000 episodes reaches nearly 80% on the real robot, with recoveries and with grasps at positions and orientations the policy was never trained on. Objects that were never in the dataset also work when their geometry is close to something that was.
 
 ## Future Work
 
