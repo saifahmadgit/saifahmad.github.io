@@ -1,9 +1,9 @@
 ---
 layout: project
-title: Fine-Tuning a Robotics Foundation Model with Simulation-Only Data
+title: Zero-Shot Sim-to-Real Fine-Tuning of a Robotics Foundation Model
 order: 1
 tech_tags: "VLA, Pi 0.5, GR00T N1.7, ACT, Isaac Sim, cuRobo, ROS 2, Franka"
-gif: /assets/gifs/Pi_0.5_fine_tuning_with_Sim_only_Data.gif
+gif: /assets/gifs/FinalProject.gif
 ---
 
 <p style="color:#555;font-size:0.95rem;margin:0 0 20px;">Apr 2026 – Present</p>
@@ -19,13 +19,19 @@ gif: /assets/gifs/Pi_0.5_fine_tuning_with_Sim_only_Data.gif
 
 Robotics foundation models now outperform task-specific policies across a wide range of manipulation problems. None of the open-weight ones, however, work zero-shot on a robot they have never seen. Each needs demonstrations from the exact setup it will be deployed on: that embodiment, those cameras, that mounting geometry. Those demonstrations are almost always collected by a human teleoperating the arm, one trajectory at a time. It is slow and expensive, and the cost is paid again from scratch for every new task, gripper, or camera placement.
 
-This project removes the human from that loop. **Pi 0.5** is fine-tuned entirely on demonstrations generated in **NVIDIA Isaac Sim**, with **cuRobo** planning the motions, and the resulting policy is deployed **zero-shot on a real Franka**, with no teleoperation and no real-world data at any stage.
+This project removes the human from that loop. **Pi 0.5** is fine-tuned entirely on demonstrations generated in **NVIDIA Isaac Sim**, with **cuRobo** planning the motions, and the resulting policy is deployed **zero-shot on a real Franka**, with no teleoperation and no real-world data at any stage. The task is picking: the policy is given the name of an object and has to pick it up off the table.
+
+Picking is a strict test of vision. To grasp an object the gripper has to arrive at exactly the right position and orientation, and the only clue to where that object is comes from the cameras. If the simulated images look too different from real ones, the policy misjudges where the object is and the grasp misses. So a high success rate on the real robot means the simulated images were close enough to real ones for the policy not to be fooled. A harder task then needs new demonstrations of that task, but not a new method. The same recipe should carry to **visually guided manipulation** in general, where success is decided by what the cameras see and how precisely the arm can be positioned from it: stacking, placing an object at a specified target, aligning a tool to a fixture.
+
+The second question is what this costs in data. Simulated episodes are cheap to generate, but the simulator never matches reality exactly, so training has to cover a wide range of randomized lighting, textures and camera placements rather than the one real setup, and covering that range takes more episodes than teleoperation would. An ongoing study measures how many more: the fewest simulated episodes that still transfer, and how many it takes to match a policy trained on real teleoperated data.
 
 ## Pipeline
 
 <img src="{{ '/assets/images/blockDiagram_Pi0.5_Sim_to_Real.png' | relative_url }}" alt="End-to-end pipeline from Isaac Sim data generation to real Franka deployment" style="width:100%;height:auto;display:block;margin:16px 0;border-radius:8px;">
 
 ### Data Collection
+
+The real cameras are calibrated first, recovering the 6D pose of each one in the robot base frame. Those poses are then reproduced in simulation, so the policy sees the same viewpoints in Isaac Sim that it will see on hardware.
 
 15 objects, each episode paired with a randomized prompt so the policy can be told which object to pick. **cuRobo** plans the motion and grasps are computed from object geometry and inertia, so nothing is teleoperated.
 
