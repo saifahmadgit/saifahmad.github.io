@@ -260,3 +260,13 @@ a:hover {
 .table-wrap tbody tr:hover {
   background: #fafafa;
 }
+
+/* ---- Figures ---- */
+.figure, .figure-wide {
+  display: block;
+  height: auto;
+  margin: 24px auto;
+  border-radius: 8px;
+}
+.figure { max-width: min(100%, 680px); }
+.figure-wide { max-width: min(100%, 940px); }

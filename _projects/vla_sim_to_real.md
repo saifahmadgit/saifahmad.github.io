@@ -27,7 +27,7 @@ The second question is what this costs in data. Simulated episodes are cheap, bu
 
 ## Pipeline
 
-<img src="{{ '/assets/images/blockDiagram_Pi0.5_Sim_to_Real.png' | relative_url }}" alt="End-to-end pipeline from Isaac Sim data generation to real Franka deployment" style="width:100%;height:auto;display:block;margin:16px 0;border-radius:8px;">
+<img src="{{ '/assets/images/blockDiagram_Pi0.5_Sim_to_Real.png' | relative_url }}" alt="End-to-end pipeline from Isaac Sim data generation to real Franka deployment" class="figure-wide">
 
 ### Data Collection
 
@@ -68,7 +68,7 @@ Two objects set the scale. A cylinder has to be gripped near its centre or it sl
 
 The task is picking a 4 cm cylinder off a 50 by 15 cm patch of table, scored at positions the policy was never shown.
 
-<img src="{{ '/assets/images/reach_map.png' | relative_url }}" alt="Grasp success across the table for the cylinder under three demonstration layouts" style="width:100%;height:auto;display:block;margin:16px 0;border-radius:8px;">
+<img src="{{ '/assets/images/reach_map.png' | relative_url }}" alt="Grasp success across the table for the cylinder under three demonstration layouts" class="figure">
 
 Five demonstration sites at 10 episodes each is 50 episodes, and the policy drops half the objects it is asked for in the spaces between those sites. Thirteen sites demonstrated once each is 13 episodes, a quarter of the data, and it picks up the object in every gap it is tested in. Returning to collect 5 episodes at each of those same 13 sites, 65 in total, changes nothing. It was already at 100% and stays there.
 
@@ -76,7 +76,7 @@ What separates the two is not how much data there is but how far any point on th
 
 Orientation behaves the same way, and the second figure holds the budget fixed to show it.
 
-<img src="{{ '/assets/images/angles_map.png' | relative_url }}" alt="Grasp success across cuboid yaw angles for three ways of spending the same 130 episodes" style="width:100%;height:auto;display:block;margin:16px 0;border-radius:8px;">
+<img src="{{ '/assets/images/angles_map.png' | relative_url }}" alt="Grasp success across cuboid yaw angles for three ways of spending the same 130 episodes" class="figure">
 
 All three conditions cost the same 130 episodes, 13 sites at 10 episodes each, and differ only in how those 10 are spread across the cuboid's yaw. Two angles, flat and side-on, fails 60% of the time when the object lies at anything else. Four angles handles a little over three quarters. Drawing a fresh angle every episode, so no orientation is taught twice and the largest untaught gap closes to under 9 degrees, handles all of them. Same episode count, three ways of spending it, and only the last produces a policy that treats orientation as a continuous quantity rather than a short list of memorised poses.
 
@@ -86,7 +86,7 @@ Coverage is the expensive thing, not volume. 13 episodes were enough for positio
 
 Everything above happened in simulation. Moving the same policy onto the real Franka, with nothing changed but the robot, it picked up 3 objects in 10.
 
-<img src="{{ '/assets/images/sim_to_real.png' | relative_url }}" alt="Real robot grasp success against episode budget, with failure mode at each budget" style="width:100%;height:auto;display:block;margin:16px 0;border-radius:8px;">
+<img src="{{ '/assets/images/sim_to_real.png' | relative_url }}" alt="Real robot grasp success against episode budget, with failure mode at each budget" class="figure">
 
 The failures say more than the number. It was not reaching for the object and missing, it was driving the gripper into the table. That is what a policy does when it has no idea where the object is, not one that is slightly off, and it is why a 30% success rate at this stage tells you nothing about how far from working you are.
 
