@@ -9,21 +9,21 @@ gif: /assets/gifs/FinalProject.gif
 <p style="color:#555;font-size:0.95rem;margin:0 0 20px;">Apr 2026 – Present</p>
 
 <iframe class="video"
-        src="https://www.youtube.com/embed/QZP_ObLCaDA"
-        title="Fine-Tuning a Robotics Foundation Model with Simulation-Only Data"
+        src="https://www.youtube.com/embed/g9rbXOJX4c8"
+        title="Zero-Shot Sim-to-Real Fine-Tuning of a Robotics Foundation Model"
         frameborder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowfullscreen></iframe>
 
 ## Overview
 
-Robotics foundation models now outperform task-specific policies across a wide range of manipulation problems. None of the open-weight ones, however, work zero-shot on a robot they have never seen. Each needs demonstrations from the exact setup it will be deployed on: that embodiment, those cameras, that mounting geometry. Those demonstrations are almost always collected by a human teleoperating the arm, one trajectory at a time. It is slow and expensive, and the cost is paid again from scratch for every new task, gripper, or camera placement.
+Robotics foundation models are the strongest starting point we have for manipulation. What none of the open-weight ones do is arrive ready for your robot. Unless your setup happens to match a configuration already in the pretraining mix, the model needs demonstrations from that exact embodiment: those cameras, that mounting geometry, that gripper. Those demonstrations come from a human teleoperating the arm, one trajectory at a time, and the bill is paid again for every new task, gripper, or camera placement.
 
-This project removes the human from that loop. **Pi 0.5** is fine-tuned entirely on demonstrations generated in **NVIDIA Isaac Sim**, with **cuRobo** planning the motions, and the resulting policy is deployed **zero-shot on a real Franka**, with no teleoperation and no real-world data at any stage. The task is picking: the policy is given the name of an object and has to pick it up off the table.
+This project removes the human from that loop. **Pi 0.5** is fine-tuned entirely on demonstrations generated in **NVIDIA Isaac Sim**, with **cuRobo** planning the motions, then deployed **zero-shot on a real Franka**, with no teleoperation and not one frame of data from the real setup. The task is picking: the policy is given an object's name and has to pick it up off the table. It succeeds 90% of the time on hardware it has never seen.
 
-Picking is a strict test of vision. To grasp an object the gripper has to arrive at exactly the right position and orientation, and the only clue to where that object is comes from the cameras. If the simulated images look too different from real ones, the policy misjudges where the object is and the grasp misses. So a high success rate on the real robot means the simulated images were close enough to real ones for the policy not to be fooled. A harder task then needs new demonstrations of that task, but not a new method. The same recipe should carry to **visually guided manipulation** in general, where success is decided by what the cameras see and how precisely the arm can be positioned from it: stacking, placing an object at a specified target, aligning a tool to a fixture.
+Picking is decided by vision. The gripper has to arrive at the right position and orientation, and the only evidence for where the object is comes from the cameras, so a miss is unambiguous and the success rate is a clean readout on whether the transfer held. The simulation does not have to look real. It has to vary enough that a real camera image looks like one more variation the policy has already learned to ignore. That is why the same recipe should carry to **visually guided manipulation** in general, to any task where success also comes down to what the cameras see and how precisely the arm can be placed from it: stacking, placing, aligning a tool to a fixture.
 
-The second question is what this costs in data. Simulated episodes are cheap to generate, but the simulator never matches reality exactly, so training has to cover a wide range of randomized lighting, textures and camera placements rather than the one real setup, and covering that range takes more episodes than teleoperation would. An ongoing study measures how many more: the fewest simulated episodes that still transfer, and how many it takes to match a policy trained on real teleoperated data.
+The second question is what this costs in data. Simulated episodes are cheap, but training has to span a wide range of lighting, textures and camera placements rather than the single real setup, and that coverage costs episodes. The measurement: 130 demonstrations to learn the task in simulation, and 650 to carry it onto the real robot. Five times as many, not fifty. The surcharge turns out to be per-dataset rather than per-task: eight objects trained together reach 80% on the real robot for roughly what the single task cost on its own.
 
 ## Pipeline
 
@@ -43,7 +43,7 @@ Domain randomization covers light (intensity, temperature, position), object tex
 
 ### Training
 
-**Pi 0.5** is fine-tuned with a fork of [openpi](https://github.com/Physical-Intelligence/openpi), conditioned on robot state and three cameras, predicting joint angle deltas rather than absolute targets. **NVIDIA H100**, 1.3 s per step.
+**Pi 0.5** is fine-tuned with a fork of [openpi](https://github.com/Physical-Intelligence/openpi), conditioned on robot state and three cameras, predicting joint angle deltas rather than absolute targets. The **SigLIP** vision encoder trains fully unfrozen, while the VLM backbone decoder is **LoRA** fine-tuned at rank 16 and the action head at rank 32. **NVIDIA H100**, 1.3 s per step.
 
 ### Inference
 
@@ -60,7 +60,45 @@ Joint logs are sampled at the driver's native **1.4 kHz**, not on the 10 Hz poli
 
 ## Results and Analysis
 
-The fine-tuned policy transfers **zero-shot** to the real Franka, reaching an **80% grasp success rate across 15 different objects** without a single real-world demonstration.
+The question is how many demonstrations a task needs. Sim-to-sim transfer answers it first: train in simulation, test in simulation on placements the policy was never shown, and read off the episode count where it starts working. That number is the baseline, and the sim-to-real budget is measured against it.
+
+Two objects set the scale. A cylinder has to be gripped near its centre or it slips, so picking it up measures precision in x and y alone. A cuboid adds yaw, since it has to be approached along the right axis as well. The gap between the two is the price of one extra degree of freedom, which makes it possible to estimate the budget for tasks with longer trajectories or several valid ways to succeed.
+
+### Sim-to-Sim Baseline
+
+The task is picking a 4 cm cylinder off a 50 by 15 cm patch of table, scored at positions the policy was never shown.
+
+<img src="{{ '/assets/images/reach_map.png' | relative_url }}" alt="Grasp success across the table for the cylinder under three demonstration layouts" style="width:100%;height:auto;display:block;margin:16px 0;border-radius:8px;">
+
+Five demonstration sites at 10 episodes each is 50 episodes, and the policy drops half the objects it is asked for in the spaces between those sites. Thirteen sites demonstrated once each is 13 episodes, a quarter of the data, and it picks up the object in every gap it is tested in. Returning to collect 5 episodes at each of those same 13 sites, 65 in total, changes nothing. It was already at 100% and stays there.
+
+What separates the two is not how much data there is but how far any point on the table sits from the nearest demonstration. Five sites leave a worst spot nearly 14 cm from anything the policy was shown. Thirteen bring that under 7 cm, less than two object widths, and below that distance the policy fills in the gap on its own. More episodes at positions it already knows buy nothing.
+
+Orientation behaves the same way, and the second figure holds the budget fixed to show it.
+
+<img src="{{ '/assets/images/angles_map.png' | relative_url }}" alt="Grasp success across cuboid yaw angles for three ways of spending the same 130 episodes" style="width:100%;height:auto;display:block;margin:16px 0;border-radius:8px;">
+
+All three conditions cost the same 130 episodes, 13 sites at 10 episodes each, and differ only in how those 10 are spread across the cuboid's yaw. Two angles, flat and side-on, fails 60% of the time when the object lies at anything else. Four angles handles a little over three quarters. Drawing a fresh angle every episode, so no orientation is taught twice and the largest untaught gap closes to under 9 degrees, handles all of them. Same episode count, three ways of spending it, and only the last produces a policy that treats orientation as a continuous quantity rather than a short list of memorised poses.
+
+Coverage is the expensive thing, not volume. 13 episodes were enough for position and 130 for orientation because in each case the demonstrations were spread finer than the tolerance the task needs. Once they are, collecting more of them is money spent on nothing.
+
+### Sim-to-Real: The Extra Data
+
+Everything above happened in simulation. Moving the same policy onto the real Franka, with nothing changed but the robot, it picked up 3 objects in 10.
+
+<img src="{{ '/assets/images/sim_to_real.png' | relative_url }}" alt="Real robot grasp success against episode budget, with failure mode at each budget" style="width:100%;height:auto;display:block;margin:16px 0;border-radius:8px;">
+
+The failures say more than the number. It was not reaching for the object and missing, it was driving the gripper into the table. That is what a policy does when it has no idea where the object is, not one that is slightly off, and it is why a 30% success rate at this stage tells you nothing about how far from working you are.
+
+Tripling the data to 390 episodes moved it to 60%, and the catastrophic failures were gone. Every failure at that budget was a reach that missed or a lift that lost the object. The failure mode changed a full step before the success rate finished moving, so a policy at 60% with no crashes is much closer to done than the same 60% would have been earlier. At 650 episodes, 5 times what the task needed in simulation, it reached 90%, essentially the simulation number.
+
+Five times, not fifty. The original budget assumed the policy has to see the combinations of everything being randomized, and that assumption is wrong. At 650 episodes, 87% of the possible sky, table, object colour and position combinations never occurred once, and the policy scored 90% anyway. Each setting only has to be covered on its own, and since every episode redraws every setting at once, a few hundred episodes cover all twelve ranges simultaneously: 96% of each range by 130 episodes, 99% by 650.
+
+That arithmetic explains why the surcharge is small. It does not explain why it is 5 and not 1. By 130 episodes there are no meaningful holes left in any range, and 130 is exactly where the real robot was still driving into the table. The 650 is measured, not derived. My reading is that covering a range and learning to ignore it are different purchases and the second is the expensive one, but that is an interpretation, and the ablation that would settle it, 650 episodes with the randomization ranges collapsed, has not been run.
+
+The last result changes what any of this costs. Spread the same 650 episode budget across 8 objects instead of 1 and the real robot still runs at 80%, with no catastrophic failures anywhere. The surcharge was never per task. Every episode of every task pays into the same account because the randomization they draw from is shared, so the bill arrives once for the dataset and the ninth task does not pay it again. If you already have a large multi-task dataset collected under randomization, you have already paid for transfer, and new collection should go on new tasks.
+
+### Conclusion
 
 ## Future Work
 
