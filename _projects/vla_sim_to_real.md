@@ -100,6 +100,12 @@ The last result changes what any of this costs. Spread the same 650 episode budg
 
 ### Conclusion
 
+Closing the visual gap takes on the order of 600 episodes, enough to cover the randomization in light, camera angle, texture and background. Once several tasks are trained together, each needing roughly that many episodes anyway, the simulation budget is not much larger in episode count than real collection would have been.
+
+More varied tasks and harder trajectories need more data, which is equally true of collecting on real hardware. What the analysis buys is the ability to decide how far to scale rather than guess. A mustard bottle has several valid grasp modes and awkward approaches. A facewash bottle is tapered, so a top-down grasp slips off it. cuRobo returns different trajectories for the same grasp pose depending on how close the object sits to the robot base. Each of those adds trajectory variety that has to be paid for in episodes.
+
+Scaled on that basis, 15 objects over a wider range of trajectories at 10 000 episodes reaches nearly 80% on the real robot, with recoveries and with grasps at positions and orientations the policy was never trained on. Objects that were never in the dataset at all also work, provided their geometry is close to something that was.
+
 ## Future Work
 
 **Contact-rich manipulation**, where interaction forces rather than the visual scene decide success. Contact dynamics are the hardest thing for a simulator to get right, so the open question is how far simulation-only data goes before real contact data becomes unavoidable.
