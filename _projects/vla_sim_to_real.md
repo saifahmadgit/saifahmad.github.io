@@ -95,15 +95,15 @@ On the real Franka, with nothing changed but the robot, the same policy picked u
 
 <img src="{{ '/assets/images/sim_to_real.png' | relative_url }}" alt="Real robot grasp success against episode budget, with failure mode at each budget" class="figure">
 
-The failures say more than the number. It was not reaching for the object and missing, it was driving the gripper into the table, which is what a policy does when it has no idea where the object is. A 30% success rate here tells you nothing about how far from working you are.
+The failures say more than the number. It was not reaching and missing, it was driving the gripper into the table: a policy with no idea where the object is, not one slightly off.
 
-At 390 episodes the rate is 60% and the catastrophic failures are gone. Every failure is a missed reach or a dropped lift. The failure mode changed a full step before the success rate finished moving. At 650 episodes, 5 times what the task needed in simulation, it reaches 90%, essentially the simulation number.
+At 390 episodes, 60%, and the crashes are gone, leaving missed reaches and dropped lifts. The failure mode changed before the success rate finished moving. At 650, five times the simulation requirement, 90%.
 
-Five times, not fifty. The original estimate assumed the policy has to see the combinations of everything being randomized. At 650 episodes, 87% of the sky, table, object colour and position combinations never occurred once, and it scored 90% anyway. Each setting only has to be covered on its own, and every episode redraws all of them at once: 96% of each range by 130 episodes, 99% by 650.
+Five times, not fifty. Fifty assumed the policy has to see combinations of the randomized settings. At 650 episodes, 87% of the sky, table, colour and position combinations never occurred once, and it scored 90% anyway. Each setting only has to be covered on its own, and every episode redraws all of them at once: 96% of each range by 130 episodes, 99% by 650.
 
-That explains why the extra data is small, not why it is 5 and not 1. By 130 episodes no meaningful holes are left in any range, and 130 is where the real robot was still driving into the table. The 650 is measured, not derived. My reading is that covering a range and learning to ignore it are different problems and the second needs more data, but that is an interpretation, and the ablation that would settle it, 650 episodes with the randomization ranges collapsed, has not been run.
+That explains why the extra data is small, not why it is 5 and not 1. By 130 episodes no meaningful holes are left in any range, and 130 is where the robot was still hitting the table. Covering a range and learning to ignore it may be different problems, but the 650 is measured, not derived, and the ablation that would settle it has not been run.
 
-Spread the same 650 episodes across 8 objects instead of 1 and the real robot still runs at 80%, with no catastrophic failures. Every episode of every task samples the same randomization, so the requirement applies once to the dataset rather than per task. With a large multi-task dataset collected under randomization, transfer is already covered and new collection should go on new tasks.
+The same 650 episodes spread across 8 objects still gives 80%. Every episode of every task samples the same randomization, so the requirement is per dataset, not per task: with a multi-task dataset already collected under randomization, new collection goes on new tasks.
 
 ### Conclusion
 
@@ -113,9 +113,11 @@ Harder trajectories need more data, in simulation as on hardware. The analysis i
 
 Scaled that way, 15 objects at 10 000 episodes reaches nearly 80% on the real robot, with recoveries and with grasps at positions and orientations the policy was never trained on. Objects that were never in the dataset also work when their geometry is close to something that was.
 
-## Future Work
+## Next Steps
 
-**Contact-rich manipulation**, where interaction forces rather than the visual scene decide success. Contact dynamics are the hardest thing for a simulator to get right, so the open question is how far simulation-only data goes before real contact data becomes unavoidable.
+The same recipe applies to longer trajectories and multi-step tasks, as long as the gap is only visual. What changes is how much data is needed, not the method.
+
+Contact-rich tasks need more. The visual part carries over, but forces decide success, so randomization has to extend to friction, mass and inertia, restitution and contact stiffness. The collision approximations also have to be revisited: a coarse convex decomposition is enough when contact only has to be plausible for a grasp, and not when contact is the task.
 
 ## Code
 
