@@ -45,6 +45,8 @@ The real cameras are calibrated first, giving the 6D pose of each one in the rob
 
 ### Inference
 
+<img src="{{ '/assets/images/Deployment.png' | relative_url }}" alt="Deployment setup: policy server, WebSocket link and the Franka arm" class="figure-wide">
+
 Policy server on an **NVIDIA RTX 6000 Ada Generation (48 GB)**; the laptop at the robot streams cameras and state over a **WebSocket** and receives action chunks, driving a **Franka FER** arm at **10 Hz**.
 
 **Real-time chunking** ([paper](https://arxiv.org/abs/2506.07339)) keeps the arm moving: the next inference fires while the current chunk is still executing and is sent back with the request, so the sampled chunk agrees with motion already committed. No stop at chunk boundaries.
