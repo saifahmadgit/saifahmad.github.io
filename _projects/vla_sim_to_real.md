@@ -9,7 +9,7 @@ gif: /assets/gifs/FinalProject.gif
 <p style="color:#555;font-size:0.95rem;margin:0 0 20px;">Apr 2026 – Present</p>
 
 <iframe class="video"
-        src="https://www.youtube.com/embed/sSsm0BidhMU"
+        src="https://www.youtube.com/embed/Po_mx85PwZ4"
         title="Zero-Shot Sim-to-Real Fine-Tuning of a Robotics Foundation Model"
         frameborder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
