@@ -9,7 +9,7 @@ gif: /assets/gifs/FinalProject.gif
 <p style="color:#555;font-size:0.95rem;margin:0 0 20px;">Apr 2026 – Present</p>
 
 <iframe class="video"
-        src="https://www.youtube.com/embed/g9rbXOJX4c8"
+        src="https://www.youtube.com/embed/sSsm0BidhMU"
         title="Zero-Shot Sim-to-Real Fine-Tuning of a Robotics Foundation Model"
         frameborder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -31,15 +31,11 @@ How many simulated demonstrations this takes, and how that compares with collect
 
 ### Data Collection
 
-The real cameras are calibrated first, recovering the 6D pose of each one in the robot base frame. Those poses are reproduced in simulation, so the policy sees the same viewpoints in Isaac Sim that it will see on hardware.
+The real cameras are calibrated first, giving the 6D pose of each one in the robot base frame. Those poses are reproduced in simulation so the viewpoints match.
 
-15 objects, each episode paired with a randomized prompt so the policy can be told which object to pick. **cuRobo** plans the motion and grasps are computed from object geometry and inertia, so nothing is teleoperated.
+15 objects, each episode paired with a randomized prompt naming the object to pick. **cuRobo** plans the motion and grasps come from object geometry and inertia, so nothing is teleoperated. Domain randomization covers light (intensity, temperature, position), object texture, background, and camera pose.
 
-**PhysX** runs at 60 Hz and rendering at 30 Hz, both recorded at 30 Hz, converted to **LeRobot v2.1**, and pushed to Hugging Face. One **NVIDIA RTX 6000 Ada Generation** collects an episode every 2 minutes.
-
-Holding that rate is what drives the asset approximations. GraspNet scans are converted to **USD** and decimated by quadric edge collapse, and the render mesh, PhysX collider and cuRobo obstacle all come from that one reduced mesh.
-
-Domain randomization covers light (intensity, temperature, position), object texture, background, and camera pose.
+**PhysX** runs at 60 Hz and rendering at 30 Hz, both recorded at 30 Hz, converted to **LeRobot v2.1** and pushed to Hugging Face. One **NVIDIA RTX 6000 Ada Generation** collects an episode every 2 minutes. Following simplifications have been done to make the simulation faster.
 
 <img src="{{ '/assets/images/asset_approximations.png' | relative_url }}" alt="Table of what was simplified in the object scans: shape detail, mesh vertices, collision shape and texture" class="figure-wide">
 
