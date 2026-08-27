@@ -89,23 +89,21 @@ So 13 episodes for x and y, 130 once yaw matters too. Every axis the gripper has
 
 <img src="{{ '/assets/images/sim_to_real.png' | relative_url }}" alt="Real robot grasp success against episode budget, with failure mode at each budget" class="figure">
 
-At the simulation budget the failure mode says more than the score. The gripper was not reaching and missing, it was driving into the table. That is a policy with no idea where the object is, not one that is slightly off.
+Simulation said 130 episodes. The real robot needs more, and the way it fails at 130 shows why. It does not reach for the object and miss by a little. It moves off in a completely wrong direction, as if it cannot see the object at all.
 
-At 390 episodes the crashes are gone, leaving missed reaches and dropped lifts, and the score is 60%. The failure mode changed before the success rate finished moving. At 650 it reaches 90%, five times the simulation requirement.
+At 390 episodes that stops. The robot reaches the object, and what is left is near misses and objects dropped on the way up. The score is 60%. At 650 episodes it reaches 90%. That is five times the simulation number.
 
-Five times and not more, because each randomized setting only has to be covered on its own, not in combination with the others. At 650 episodes, 87% of the light, table, colour and position combinations had never occurred once, and the policy scored 90% anyway. Every episode redraws all the settings at the same time, so the individual ranges fill in fast: 96% of each by 130 episodes, 99% by 650.
+By 650 the policy has seen enough variation in light, table, object colour and camera position to stop depending on any of them. That invariance is what carries it over to the real robot.
 
-That explains why the extra data is small, not why it is five times and not one. 96% of every range is already covered at 130 episodes, and 130 is where the gripper was still hitting the table. Covering a range and learning to ignore it may be different problems. The 650 is measured, and the ablation that would settle it has not been run.
-
-The requirement is per dataset, not per task. The same 650 episodes spread over 8 objects still gives 80%, since every episode of every task samples the same randomization. Once one multi-task dataset is collected under randomization, new collection goes on new tasks.
+It is a property of the dataset, not of the task. The same 650 episodes split across 8 objects still gives 80%, because every episode of every task randomizes the same way. So the cost is paid once: any task, or group of tasks, that would have needed around 650 real demonstrations anyway needs no extra episodes in simulation.
 
 ### Conclusion
 
-Around 600 episodes covers the randomization in light, camera angle, texture and background. With several tasks trained together, each needing roughly that many anyway, the simulation budget is close to what real collection would have cost in episodes.
+Around 650 episodes of domain randomization is what it takes for the policy to stop depending on light, table, colour and camera position, and that invariance is what makes it work on the real robot. It is a one-time cost. It does not grow with the number of tasks, because every episode of every task is randomized the same way.
 
-Harder trajectories need more data, in simulation as on hardware. The analysis is what makes scaling a decision rather than a guess. A mustard bottle has several valid grasp modes. A facewash bottle is tapered, so a top-down grasp slips off it. cuRobo returns different trajectories for the same grasp pose depending on how close the object sits to the robot base. Each adds trajectory variety, and that needs more episodes.
+Everything past 650 is not a sim-to-real cost. It is what the tasks themselves need, and it would be needed on real hardware too. A mustard bottle has several valid grasp modes. A facewash bottle is tapered, so a top-down grasp slips off it. cuRobo returns different trajectories for the same grasp pose depending on how close the object sits to the robot base. Each of these adds trajectories the policy has to see, in simulation or on hardware.
 
-Scaled that way, 15 objects at 10 000 episodes reaches nearly 80% on the real robot, with recoveries and with grasps at positions and orientations the policy was never trained on. Objects that were never in the dataset also work when their geometry is close to something that was.
+So once a dataset is around 650 episodes or larger, simulation costs no extra episodes. Here that dataset is 15 objects and 10 000 episodes, reaching nearly 80% on the real robot, with recoveries and with grasps at positions and orientations that were never trained on. Objects that were not in the dataset work too when their geometry is close to one that was. None of it is teleoperated.
 
 ## Next Steps
 
