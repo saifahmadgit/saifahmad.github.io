@@ -19,11 +19,11 @@ gif: /assets/gifs/FinalProject.gif
 
 Robotics foundation models are the strongest starting point we have for manipulation, but none of the open-weight ones arrive ready for your robot. Unless your setup matches something already in the pretraining mix, the model needs demonstrations from that exact embodiment: those cameras, that mounting geometry, that gripper. They come from a human teleoperating the arm one trajectory at a time, and the whole collection is repeated for every new task, gripper, or camera placement.
 
-This project removes the human from that loop. **Pi 0.5** is fine-tuned entirely on demonstrations generated in **NVIDIA Isaac Sim**, with **cuRobo** planning the motions, then deployed **zero-shot on a real Franka**, with no teleoperation and not one frame of data from the real setup. The task is picking: the policy is given an object's name and has to pick it up off the table. It succeeds 80% of the time on hardware it has never seen.
+This project removes the human from that loop. **Pi 0.5** is fine-tuned entirely on demonstrations generated in **NVIDIA Isaac Sim**, with **cuRobo** planning the motions, then deployed **zero-shot on a real Franka**, with no teleoperation and not one frame of data from the real setup. The task is to grasp and pick up: the policy is given an object's name and has to lift it off the table. It succeeds 80% of the time on hardware it has never seen.
 
-Picking is decided by vision. The gripper has to arrive at the right position and orientation, and the only evidence for where the object is comes from the cameras, so the success rate is a clean readout on whether the transfer held. The simulation does not have to look real. It has to vary enough that a real camera image is one more variation the policy has already learned to ignore, which is why the same recipe should carry to **visually guided manipulation** in general: stacking, placing, aligning a tool to a fixture.
+Grasping makes a clean test because it is decided by vision alone: the gripper has to reach the right position and orientation, and the object's location is known only from the camera images. Doing it on real hardware establishes that the visual sim-to-real gap is closed, and the same recipe extends to more complex **visually guided manipulation**.
 
-What that costs in data is measured below. 130 demonstrations teach the task in simulation, 5 times as many carry it onto the real robot, and that extra data is not needed again once several tasks share a dataset.
+How many simulated demonstrations this takes, and how that compares with collecting on real hardware, has also been analysed.
 
 ## Pipeline
 
