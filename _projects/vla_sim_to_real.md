@@ -60,11 +60,11 @@ Joint logs are sampled at the driver's native **1.4 kHz**, not on the 10 Hz poli
 
 How many demonstrations does a task need? Sim-to-sim answers that first: train in simulation, test on placements the policy was never shown, and read off the episode count where it starts working. That is the baseline the sim-to-real requirement is measured against.
 
-Two objects set the scale. A cylinder has to be gripped near its centre or it slips, so it measures precision in x and y. A cuboid adds yaw. The difference between them is what one extra degree of freedom requires.
-
 ### Sim-to-Sim Baseline
 
-Picking a 4 cm cylinder off a 50 by 15 cm patch of table, scored at positions the policy was never shown.
+Two tasks set the scale. Picking up a 4 cm cylinder needs the gripper precise in x and y, since a cylinder looks the same from every direction. Picking up a cuboid adds yaw. Nothing else changes between them, so the gap between the two episode counts is what one extra degree of freedom costs.
+
+Both are scored over a 50 by 15 cm patch of table, at placements the policy was never shown.
 
 <div class="figure-pair">
   <figure>
@@ -77,29 +77,27 @@ Picking a 4 cm cylinder off a 50 by 15 cm patch of table, scored at positions th
   </figure>
 </div>
 
-Five sites at 10 episodes each, 50 in total, drops half the objects in the gaps between sites. Thirteen sites at one episode each, a quarter of the data, picks up the object in every gap it is tested in. Five episodes at each of those same 13 sites, 65 in total, changes nothing. It was already at 100%.
+Position first. Fifty episodes spread over 5 sites fails: half the objects fall in the gaps between sites. Thirteen episodes over 13 sites, a quarter of the data, picks the object up everywhere it is tested.
 
-What separates them is not the amount of data but the distance from any point on the table to the nearest demonstration. Five sites leave a worst spot nearly 14 cm away. Thirteen bring that under 7 cm, less than two object widths, and below that distance the policy fills in the gap on its own.
+What counts is the spacing between demonstrations, not how many there are. Thirteen sites over the 750 cm&sup2; patch is one demonstration per 58 cm&sup2;. At that spacing the policy covers the gaps on its own; at one per 150 cm&sup2; it does not. And more data at the same spacing adds nothing: 65 episodes over those same 13 sites still scores 100%.
 
-Orientation behaves the same way at fixed data size. All three conditions are 130 episodes, 13 sites at 10 each, differing only in how those 10 spread across the cuboid's yaw. Two angles fails 60% of the time at anything else. Four angles handles a little over three quarters. A fresh angle every episode, closing the largest untaught gap to under 9 degrees, handles all of them.
+Yaw costs ten times more. The cuboid needs 130 episodes, the same 13 sites with 10 angles at each, and the angles have to differ. Ten episodes split over two angles fails 60% of the time on anything else, over four angles about a quarter of the time. Only a fresh angle every episode works everywhere.
 
-Coverage, not volume. 13 episodes for position and 130 for orientation were enough because the demonstrations were spread finer than the tolerance the task needs. Past that, more of them change nothing.
+So 13 episodes for x and y, 130 once yaw matters too. Every axis the gripper has to get right multiplies the data, and a task needing a full 6D pose adds roll and pitch on top of that.
 
 ### Sim-to-Real: The Extra Data
 
-On the real Franka, with nothing changed but the robot, the same policy picked up 3 objects in 10.
-
 <img src="{{ '/assets/images/sim_to_real.png' | relative_url }}" alt="Real robot grasp success against episode budget, with failure mode at each budget" class="figure">
 
-The failures say more than the number. It was not reaching and missing, it was driving the gripper into the table: a policy with no idea where the object is, not one slightly off.
+At the simulation budget the failure mode says more than the score. The gripper was not reaching and missing, it was driving into the table. That is a policy with no idea where the object is, not one that is slightly off.
 
-At 390 episodes, 60%, and the crashes are gone, leaving missed reaches and dropped lifts. The failure mode changed before the success rate finished moving. At 650, five times the simulation requirement, 90%.
+At 390 episodes the crashes are gone, leaving missed reaches and dropped lifts, and the score is 60%. The failure mode changed before the success rate finished moving. At 650 it reaches 90%, five times the simulation requirement.
 
-Five times, not fifty. Fifty assumed the policy has to see combinations of the randomized settings. At 650 episodes, 87% of the sky, table, colour and position combinations never occurred once, and it scored 90% anyway. Each setting only has to be covered on its own, and every episode redraws all of them at once: 96% of each range by 130 episodes, 99% by 650.
+Five times and not more, because each randomized setting only has to be covered on its own, not in combination with the others. At 650 episodes, 87% of the light, table, colour and position combinations had never occurred once, and the policy scored 90% anyway. Every episode redraws all the settings at the same time, so the individual ranges fill in fast: 96% of each by 130 episodes, 99% by 650.
 
-That explains why the extra data is small, not why it is 5 and not 1. By 130 episodes no meaningful holes are left in any range, and 130 is where the robot was still hitting the table. Covering a range and learning to ignore it may be different problems, but the 650 is measured, not derived, and the ablation that would settle it has not been run.
+That explains why the extra data is small, not why it is five times and not one. 96% of every range is already covered at 130 episodes, and 130 is where the gripper was still hitting the table. Covering a range and learning to ignore it may be different problems. The 650 is measured, and the ablation that would settle it has not been run.
 
-The same 650 episodes spread across 8 objects still gives 80%. Every episode of every task samples the same randomization, so the requirement is per dataset, not per task: with a multi-task dataset already collected under randomization, new collection goes on new tasks.
+The requirement is per dataset, not per task. The same 650 episodes spread over 8 objects still gives 80%, since every episode of every task samples the same randomization. Once one multi-task dataset is collected under randomization, new collection goes on new tasks.
 
 ### Conclusion
 
