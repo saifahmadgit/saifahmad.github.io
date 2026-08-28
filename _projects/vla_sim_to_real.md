@@ -37,7 +37,7 @@ The real cameras are calibrated first, giving the 6D pose of each one in the rob
 
 **PhysX** runs at 60 Hz and rendering at 30 Hz, both recorded at 30 Hz, converted to **LeRobot v2.1** and pushed to Hugging Face. One **NVIDIA RTX 6000 Ada Generation** collects an episode every 2 minutes. Following simplifications have been done to make the simulation faster.
 
-<img src="{{ '/assets/images/asset_approximations.png' | relative_url }}" alt="Table of what was simplified in the object scans: shape detail, mesh vertices, collision shape and texture" class="figure-wide">
+<img src="{{ '/assets/images/asset_approximations.png' | relative_url }}" alt="Table of what was simplified in the object scans: shape detail, mesh vertices, collision shape and texture" class="figure-half">
 
 ### Training
 
